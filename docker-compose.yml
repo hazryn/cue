@@ -1,0 +1,88 @@
+# Pełny stack jednym poleceniem: docker compose up
+#   baza + backend (API + WebSocket) + frontend (Vite)
+#
+# Produkcja na serwerze jedzie na k3s i wystawiana jest osobno — stamtąd używany
+# jest wyłącznie target `prod` z Dockerfile, nie ten plik.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cue-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-cue}
+      POSTGRES_USER: ${DB_USER:-cue}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cue}
+    ports:
+      - '${DB_PORT:-7202}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-cue} -d ${DB_NAME:-cue}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      target: dev-api
+    container_name: cue-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      # Własne ustawienia (np. PUBLIC_URL z adresem IP w sieci) — plik nie musi istnieć
+      - path: .env.local
+        required: false
+    environment:
+      # Wewnątrz sieci compose baza jest pod nazwą usługi, nie na localhoście
+      DB_HOST: postgres
+      DB_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${PORT:-7200}:7200'
+    volumes:
+      - .:/app
+      # Artefakty budowania trzymamy w kontenerze: inaczej proces w obrazie
+      # (root) nadpisuje katalogi dist hosta i lokalne `npm run build` przestaje działać
+      - /app/node_modules
+      - /app/backend/dist
+      - /app/packages/shared/dist
+
+  web:
+    build:
+      context: .
+      target: dev-web
+    container_name: cue-web
+    restart: unless-stopped
+    env_file:
+      - .env
+      # Własne ustawienia (np. PUBLIC_URL z adresem IP w sieci) — plik nie musi istnieć
+      - path: .env.local
+        required: false
+    environment:
+      # Przeglądarka łączy się tylko z Vite, a Vite przekazuje /api i /socket.io
+      # do backendu. Dzięki temu telefony w domowym WiFi nie muszą znać portu 7200.
+      VITE_API_URL: ''
+      API_PROXY_TARGET: http://api:7200
+    depends_on:
+      - api
+    ports:
+      - '7201:7201'
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/frontend/dist
+
+volumes:
+  pgdata:
+
+networks:
+  default:
+    ipam:
+      config:
+        # Jawna podsieć: domyślne 172.17–172.31 bywają przejęte przez trasy VPN,
+        # a wtedy ruch z hosta do kontenerów znika w tunelu i porty tylko wiszą.
+        # Nadpisz przez CUE_SUBNET, jeśli u Ciebie ta pula też jest zajęta.
+        - subnet: ${CUE_SUBNET:-10.172.72.0/24}
