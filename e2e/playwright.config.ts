@@ -4,7 +4,7 @@ const WEB = process.env.E2E_WEB_URL ?? 'http://localhost:7201';
 const API = process.env.E2E_API_URL ?? 'http://localhost:7200';
 
 // Ten sam zestaw testów puszczamy też na wdrożonej aplikacji:
-//   E2E_WEB_URL=https://druzynada.example.com E2E_API_URL=https://druzynada.example.com npm run e2e
+//   E2E_WEB_URL=https://gra.example.com E2E_API_URL=https://gra.example.com npm run e2e
 // Wtedy nie ma czego uruchamiać lokalnie — serwery już stoją po drugiej stronie.
 const local = WEB.includes('localhost') || WEB.includes('127.0.0.1');
 

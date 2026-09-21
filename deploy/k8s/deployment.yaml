@@ -22,7 +22,7 @@ spec:
         - name: registry-pull
       containers:
         - name: app
-          image: registry.example.com/cue/app:latest
+          image: registry.example.com/druzynada/app:latest
           imagePullPolicy: Always
           ports:
             - name: http

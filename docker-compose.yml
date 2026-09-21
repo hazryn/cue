@@ -1,8 +1,8 @@
 # Pełny stack jednym poleceniem: docker compose up
 #   baza + backend (API + WebSocket) + frontend (Vite)
 #
-# Produkcja na serwerze jedzie na k3s i wystawiana jest osobno — stamtąd używany
-# jest wyłącznie target `prod` z Dockerfile, nie ten plik.
+# Produkcja używa wyłącznie targetu `prod` z Dockerfile (jeden kontener),
+# nie tego pliku — patrz README, sekcja „Wdrożenie".
 services:
   postgres:
     image: postgres:16-alpine

@@ -728,7 +728,7 @@ Weryfikacja w `@WebSocketGateway` przez `allowRequest` / middleware `io.of('/adm
 
 **Warstwa 4 — gracze.** `deviceToken` (uuid v4) wydawany przy `PlayJoinReq`, zapisany w `localStorage['cue.play.token']`. Reconnect = `deviceToken` → ta sama drużyna. Guard na `/play` sprawdza istnienie `team` z tym tokenem w aktywnej grze. Token to capability — kto go ma, jest tą drużyną. Przy 3 parach w salonie wystarczy; nie ma sensu dokładać nic więcej.
 
-**Warstwa 5 — HTTPS.** Traefik/Caddy w compose, Let's Encrypt dla `druzynada.example.com`. Bez TLS `deviceToken` i admin JWT lecą plaintextem po WiFi — i ktoś z telefonem *będzie* miał pokusę.
+**Warstwa 5 — HTTPS.** Traefik/Caddy w compose, Let's Encrypt dla domeny gry. Bez TLS `deviceToken` i admin JWT lecą plaintextem po WiFi — i ktoś z telefonem *będzie* miał pokusę.
 
 ### 5.3 REST (CRUD pytań)
 
@@ -992,8 +992,8 @@ Uwagi frontowe:
 ```
 docker-compose.yml
   api      → node:22-alpine, build backend, serwuje też statyki z /app/public (SPA fallback)
-  caddy    → TLS dla druzynada.example.com, reverse proxy, websocket upgrade
-  (postgres: ISTNIEJĄCY na serwer — tylko nowa baza `cue` + user, przez external network)
+  caddy    → TLS dla domeny gry, reverse proxy, websocket upgrade
+  (postgres: istniejąca instancja — tylko nowa baza `cue` + user, przez external network)
 ```
 
 Jeden kontener Node serwujący API + WS + statyki jest prostszy niż osobny nginx i eliminuje klasę problemów z CORS/WS upgrade. `ServeStaticModule` z `exclude: ['/api/*', '/socket.io/*']` i fallbackiem na `index.html`.
@@ -1080,7 +1080,7 @@ Każdy etap kończy się czymś uruchamialnym i testowalnym.
 - `docker-compose.yml`, Caddy, baza `cue` na serwerze, `.env`
 - NestJS bootstrap + TypeORM połączenie + healthcheck
 - Vite + Vue + Tailwind + router z 3 pustymi widokami
-- **Test:** `druzynada.example.com/tv` pokazuje „hello", `/api/health` zwraca 200.
+- **Test:** `<domena>/tv` pokazuje „hello", `/api/health` zwraca 200.
 
 ### Etap 1 — Katalog pytań (3–4 h)
 - Encje `pack`/`question`/`answer` + migracje

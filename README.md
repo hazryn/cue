@@ -27,6 +27,7 @@
 - [Pytania, dźwięki, grafika](#pytania-dźwięki-grafika)
 - [Dla programistów](#dla-programistów)
 - [Wsparcie](#wsparcie)
+- [Licencja](#licencja)
 
 ## Jak to wygląda
 
@@ -192,7 +193,7 @@ Migracje bazy wykonują się same przy starcie kontenera.
 
 ### Kubernetes
 
-W [`deploy/k8s/`](deploy/k8s/) są manifesty, na których działa instancja autora (k3s + Traefik): Deployment, Service, Ingress i instrukcja z sekretami. Przed użyciem podmień domenę w Ingressie, obraz w Deploymencie i adres bazy.
+W [`deploy/k8s/`](deploy/k8s/) jest baza manifestów (Deployment, Service, Ingress pod Traefika) z przykładowymi wartościami. Własną domenę, obraz i adres publiczny ustawiasz w nakładce kustomize trzymanej poza repozytorium — instrukcja krok po kroku, razem z sekretami, jest w [`deploy/k8s/README.md`](deploy/k8s/README.md).
 
 ### O czym pamiętać
 
@@ -268,3 +269,7 @@ Jeśli Drużynada rozkręciła Wam imprezę, możesz postawić autorowi kawę:
 </p>
 
 Błędy i pomysły zgłaszaj w [Issues](https://github.com/hazryn/cue/issues).
+
+## Licencja
+
+[MIT](LICENSE) — możesz używać, zmieniać i stawiać u siebie, także komercyjnie. Zachowaj tylko informację o autorze i licencji.

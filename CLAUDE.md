@@ -94,10 +94,11 @@ i generuj tylko ten plik.
 
 ## Wdrożenie
 
-k3s na serwerze, namespace `cue`, manifesty w `deploy/k8s/`. Obraz z targetu `prod`
-idzie do `registry.example.com/cue/app`. Domeny obsługuje Caddy na hoście serwer,
-zarządzany Ansiblem z repo `homelab` (lista `caddy_k3s_hosts`) — nowa domena
-wymaga wpisu tam, nie ręcznej edycji Caddyfile na serwerze.
+Kubernetes, namespace `cue`. `deploy/k8s/` to baza z przykładowymi wartościami
+(`example.com`); prawdziwa domena, registry i adres publiczny żyją w nakładce
+`deploy/local/`, wykluczonej z gita. **Repo jest publiczne — żadnych prawdziwych
+domen, adresów serwerów ani nazw prywatnej infrastruktury w plikach śledzonych.**
+Szczegóły konkretnego wdrożenia: `CLAUDE.local.md` (też poza gitem).
 
 Zmienne `VITE_*` są build-time: produkcyjny build bierze `.env.production`
 z pustym `VITE_API_URL`, żeby klient trzymał się originu strony.

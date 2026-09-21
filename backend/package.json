@@ -67,5 +67,6 @@
     "moduleNameMapper": {
       "^@cue/shared$": "<rootDir>/../../packages/shared/src/index.ts"
     }
-  }
+  },
+  "license": "MIT"
 }

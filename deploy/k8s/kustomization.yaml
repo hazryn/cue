@@ -1,0 +1,10 @@
+# Baza manifestów z przykładowymi wartościami. Własną domenę, obraz i adres
+# publiczny podmień w nakładce (patrz README), zamiast edytować te pliki.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: cue
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
