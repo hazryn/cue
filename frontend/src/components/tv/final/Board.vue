@@ -98,7 +98,7 @@ const questionText = computed(() =>
         </div>
         <div class="text-center">
           <p class="font-display text-[2.4vh] tracking-[0.3em] text-white/50">POTRZEBA</p>
-          <p class="font-display text-[6vh] leading-none text-white/40">{{ final.threshold }}</p>
+          <p data-testid="tv-final-threshold" class="font-display text-[6vh] leading-none text-white/40">{{ final.threshold }}</p>
         </div>
         <p
           v-if="final.won !== null"

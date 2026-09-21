@@ -2,7 +2,8 @@
  * Final FSM.
  *
  * Dwie tury tej samej piątki pytań. Gracz 2 jest wyprowadzany z pokoju na czas
- * tury gracza 1 i dostaje 5 s więcej, bo nie może powtarzać odpowiedzi partnera.
+ * tury gracza 1, a potem nie może powtarzać odpowiedzi partnera. Tury nie mają
+ * limitu czasu — tempo nadaje prowadzący.
  * Punkty pozostają ukryte do fazy F_REVEAL — patrz projections.ts.
  */
 import { FinalSlot, FinalState, GameState, SoundKey, Uuid } from '@cue/shared';
@@ -37,7 +38,7 @@ export function createFinalState(
     p2Name,
     turn: null,
     qCursor: 0,
-    timer: { totalMs: state.config.p1TimeMs, remainingMs: state.config.p1TimeMs, deadlineAt: null, running: false },
+    timer: { totalMs: 0, remainingMs: 0, deadlineAt: null, running: false },
     slots,
     duplicateBuzzes: 0,
     revealCursor: 0,
@@ -50,10 +51,9 @@ export function slotOf(final: FinalState, player: 1 | 2, qIdx: number): FinalSlo
 }
 
 export function beginTurn(state: GameState, final: FinalState, player: 1 | 2, sounds: SoundKey[]): void {
-  const totalMs = player === 1 ? state.config.p1TimeMs : state.config.p2TimeMs;
   final.turn = player;
   final.qCursor = 0;
-  final.timer = { totalMs, remainingMs: totalMs, deadlineAt: null, running: false };
+  final.timer = { totalMs: 0, remainingMs: 0, deadlineAt: null, running: false };
   final.fsm = player === 1 ? 'F_P1_READY' : 'F_P2_READY';
   sounds.push('final_intro');
 }
@@ -163,8 +163,7 @@ export function applyFinalPass(final: FinalState, sounds: SoundKey[]): void {
 
 /**
  * Kolejne pytanie: najpierw nietknięte w przód, potem pominięte (PASS) od początku.
- * Gdy wszystko rozstrzygnięte — tura kończy się sama, a niewykorzystany czas
- * przepada (nie przechodzi na drugiego gracza).
+ * Gdy wszystko rozstrzygnięte — tura kończy się sama.
  */
 export function advanceCursor(final: FinalState): void {
   if (final.turn === null) return;

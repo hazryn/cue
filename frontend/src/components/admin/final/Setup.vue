@@ -76,7 +76,7 @@ async function start(): Promise<void> {
       <label class="mb-2 block text-xs uppercase tracking-widest text-white/40">Gracz 1 — gra pierwszy</label>
       <input v-model="p1Name" class="input mb-3" placeholder="Imię" maxlength="24" />
       <label class="mb-2 block text-xs uppercase tracking-widest text-white/40">
-        Gracz 2 — wychodzi z pokoju, dostaje 5 s więcej
+        Gracz 2 — wychodzi z pokoju na czas tury gracza 1
       </label>
       <input v-model="p2Name" class="input" placeholder="Imię" maxlength="24" />
     </section>

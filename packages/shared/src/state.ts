@@ -185,8 +185,6 @@ export interface GameConfig {
   multiplierFromIndex: number;
   multiplier: number;
   questionsPerGame: number;
-  p1TimeMs: number;
-  p2TimeMs: number;
   finalQuestionCount: number;
   finalThreshold: number;
 }
@@ -199,10 +197,10 @@ export const DEFAULT_CONFIG: GameConfig = {
   multiplierFromIndex: 5,
   multiplier: 2,
   questionsPerGame: 10,
-  p1TimeMs: 25_000,
-  p2TimeMs: 30_000,
   finalQuestionCount: 5,
-  finalThreshold: 200,
+  // 200 jak w telewizji okazało się przy stole nieosiągalne nawet przy samych
+  // najwyżej punktowanych odpowiedziach — pięć pytań daje zwykle ok. 90–110 na gracza
+  finalThreshold: 100,
 };
 
 // -------------------------------------------------------------- pełny stan

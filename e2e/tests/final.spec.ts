@@ -124,7 +124,9 @@ test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', as
   const total = Number(await table.tv.getByTestId('tv-final-total').innerText());
   expect(total).toBeGreaterThan(0);
   const verdict = table.tv.getByTestId('tv-final-verdict');
-  await expect(verdict).toHaveText(total >= 200 ? 'NAGRODA GŁÓWNA!' : 'ZABRAKŁO PUNKTÓW');
+  const threshold = Number(await table.tv.getByTestId('tv-final-threshold').innerText());
+  expect(threshold).toBe(100);
+  await expect(verdict).toHaveText(total >= threshold ? 'NAGRODA GŁÓWNA!' : 'ZABRAKŁO PUNKTÓW');
 
   // Werdykt nie może wypchnąć ekranu poza telewizor. Mierzymy po animacji wejścia —
   // w trakcie niej napis startuje z trzykrotnym powiększeniem.

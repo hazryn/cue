@@ -53,7 +53,7 @@ describe('finał — tura gracza', () => {
     expect(s.final!.fsm).toBe('F_P1_RUNNING');
   });
 
-  it('komplet rozstrzygniętych pytań kończy turę, a niewykorzystany czas przepada', () => {
+  it('komplet rozstrzygniętych pytań sam kończy turę', () => {
     let s = startTimer(beginTurn(gameAtFinal().state, 1));
     for (let i = 0; i < 5; i++) s = fhit(s, `f${i}-a0`);
 
@@ -123,6 +123,19 @@ describe('finał — odsłanianie i próg', () => {
     expect(s.final!.fsm).toBe('F_RESULT');
     expect(s.final!.total).toBe(300); // 5x35 (gracz 1) + 5x25 (gracz 2)
     expect(s.final!.total >= s.config.finalThreshold).toBe(true);
+  });
+
+  it('próg nagrody to 100 punktów — dokładnie 100 wystarcza', () => {
+    // 5 × 15 (gracz 1) + 5 × 5 (gracz 2) = 100
+    let s = playBothTurns((player) => (player === 1 ? 2 : 4));
+    for (let i = 0; i < 10; i++) {
+      s = apply(s, { type: 'ADMIN_FINAL_REVEAL_NEXT', at: tick(), actor: 'admin', payload: {} });
+    }
+    expect(s.config.finalThreshold).toBe(100);
+    expect(s.final!.total).toBe(100);
+
+    const ctx = { seq: 1, gameId: 'g', presence: new Map(), undoStack: [], joinUrl: '', spareQuestions: 0 };
+    expect(projectTv(s, ctx).final!.won).toBe(true);
   });
 
   it('odsłaniamy najpierw komplet gracza 1, potem gracza 2', () => {

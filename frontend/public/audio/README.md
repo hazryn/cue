@@ -77,8 +77,8 @@ zaczyna od ekranu „Kliknij, aby rozpocząć".
 | `duplicate_buzz.mp3` | gracz 2 powtórzył odpowiedź partnera | 1–1,5 s |
 | `final_reveal.mp3` | odsłonięcie slotu z punktami | 0,5–1 s |
 | `final_reveal_zero.mp3` | odsłonięcie slotu bez punktów | 0,5–1 s |
-| `final_win.mp3` | suma ≥ 200 | 5–10 s |
-| `final_lose.mp3` | suma < 200 | 3–5 s |
+| `final_win.mp3` | suma finału osiąga próg (domyślnie 100) | 5–10 s |
+| `final_lose.mp3` | suma finału poniżej progu | 3–5 s |
 
 > **Uwaga na `final_ok.mp3`.** Ten dźwięk brzmi tak samo przy trafieniu i przy
 > błędzie — celowo. Gdyby trafienie miało radosny „ding", gracz 2 wiedziałby po

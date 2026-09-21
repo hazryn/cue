@@ -1,3 +1,7 @@
+> **Dokument z etapu projektowania.** Część założeń zmieniła się po testach przy stole:
+> finał nie ma zegara (tura kończy się odpowiedziami albo ręcznie), a próg nagrody
+> głównej to 100 punktów zamiast 200. Aktualne zasady opisuje README.
+
 Katalog jest pusty (tylko pusty `README.md`) — projektuję od zera, bez ograniczeń istniejącego kodu.
 
 ---
