@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #app {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-board-deep font-body text-white antialiased;
+    /* Telefon-grzybek: żadnego zaznaczania tekstu ani podświetleń przy tapnięciu */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply btn bg-gold text-board-deep hover:bg-gold-dark;
+  }
+  .btn-ghost {
+    @apply btn border border-white/20 bg-white/5 text-white hover:bg-white/10;
+  }
+  .btn-danger {
+    @apply btn bg-rose-600 text-white hover:bg-rose-500;
+  }
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/5 p-4;
+  }
+  .input {
+    @apply w-full rounded-xl border border-white/15 bg-board-deep/60 px-4 py-3 text-white placeholder-white/40 outline-none focus:border-gold;
+  }
+
+  /* Natywna strzałka selecta klei się do krawędzi i gryzie z zaokrągleniem,
+     więc rysujemy własną i odsuwamy ją tak samo, jak odsunięty jest tekst. */
+  select.input {
+    @apply appearance-none bg-no-repeat pr-11;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.55' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 1rem center;
+    background-size: 1.05rem;
+  }
+
+  /* Rozwinięta lista rysuje się systemowo — bez tego bywa biały tekst na białym */
+  select.input option {
+    @apply bg-board-mid text-white;
+  }
+  /* Ekran TV skalujemy jednostkami widoku — 55 cali i laptop mają wyglądać tak samo */
+  .tv-shell {
+    @apply h-full w-full overflow-hidden bg-gradient-to-b from-board-mid to-board-deep;
+  }
+}
