@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { IsArray, IsOptional, IsUUID } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsUUID } from 'class-validator';
 import { AdminHttpGuard } from '../common/guards/admin-http.guard';
 import { GameService } from './game.service';
 
@@ -9,6 +9,11 @@ class CreateGameDto {
   @IsArray()
   @IsUUID('4', { each: true })
   packIds?: string[];
+
+  /** Domyślnie drużyny przechodzą do nowej gry; `false` zaczyna od pustego lobby */
+  @IsOptional()
+  @IsBoolean()
+  keepTeams?: boolean;
 }
 
 @Controller('api/game')
@@ -26,7 +31,7 @@ export class GameController {
   @UseGuards(AdminHttpGuard)
   @Post()
   async create(@Body() dto: CreateGameDto): Promise<{ id: string; code: string }> {
-    const game = await this.games.createGame(dto.packIds ?? null);
+    const game = await this.games.createGame(dto.packIds ?? null, dto.keepTeams ?? true);
     return { id: game.id, code: game.code };
   }
 }

@@ -105,10 +105,15 @@ export class GameService implements OnModuleInit {
 
   // -------------------------------------------------------- tworzenie gry
 
-  /** Nowa gra: dezaktywuje poprzednią i zamraża kopie wszystkich wybranych pytań. */
-  async createGame(packIds: Uuid[] | null): Promise<GameEntity> {
-    return this.dataSource.transaction(async (manager) => {
-      await manager.getRepository(GameEntity).update({ isActive: true }, { isActive: false });
+  /**
+   * Nowa gra: dezaktywuje poprzednią, zamraża kopie wybranych pytań i — domyślnie —
+   * przenosi drużyny, żeby kolejna runda wieczoru nie zaczynała się od skanowania kodów.
+   */
+  async createGame(packIds: Uuid[] | null, keepTeams = true): Promise<GameEntity> {
+    const game = await this.dataSource.transaction(async (manager) => {
+      const games = manager.getRepository(GameEntity);
+      const previous = await games.findOne({ where: { isActive: true } });
+      await games.update({ isActive: true }, { isActive: false });
 
       const questions = await this.loadQuestions(manager, packIds);
       const state = initialState();
@@ -117,17 +122,78 @@ export class GameService implements OnModuleInit {
       const mainIds = questions.filter((q) => q.kind === 'MAIN').map((q) => q.id);
       const finalIds = questions.filter((q) => q.kind === 'FINAL').map((q) => q.id);
 
-      const game = manager.getRepository(GameEntity).create({
-        code: this.generateCode(),
-        phase: GamePhase.LOBBY,
-        state,
-        lastSeq: 0,
-        isActive: true,
-        finalQuestionIds: finalIds,
-        spareQuestionIds: mainIds,
-      });
-      return manager.getRepository(GameEntity).save(game);
+      const created = await games.save(
+        games.create({
+          code: this.generateCode(),
+          phase: GamePhase.LOBBY,
+          state,
+          lastSeq: 0,
+          isActive: true,
+          finalQuestionIds: finalIds,
+          spareQuestionIds: mainIds,
+        }),
+      );
+      if (previous && keepTeams) await this.carryTeamsOver(manager, previous, created);
+      return created;
     });
+
+    // Bez tego nową grę widział tylko panel, który ją założył — telewizor
+    // i telefony zostawały na ekranie końca poprzedniej rozgrywki.
+    this.buzzer.invalidateAll();
+    await this.afterChange(game.id, game.state, game.lastSeq, []);
+    return game;
+  }
+
+  /**
+   * Drużyny z poprzedniej gry przechodzą do nowej z zerowym wynikiem.
+   *
+   * Przenosimy wiersze drużyn (zamiast zakładać nowe), więc zostają te same
+   * identyfikatory i tokeny urządzeń: telefony, obecność i zegary grzybków działają
+   * dalej bez ponownego dołączania. Dołączenia trafiają do logu nowej gry jako
+   * zwykłe TEAM_JOIN, żeby cofanie i odtwarzanie stanu nic o tym nie musiało wiedzieć.
+   */
+  private async carryTeamsOver(manager: EntityManager, previous: GameEntity, game: GameEntity): Promise<void> {
+    const kept = previous.state.teams.filter((t) => !t.removed);
+    if (kept.length === 0) return;
+
+    const teams = manager.getRepository(TeamEntity);
+    const rows = await teams.find({ where: { gameId: previous.id, isRemoved: false } });
+    const movable = kept.filter((t) => rows.some((row) => row.id === t.id));
+    if (movable.length === 0) return;
+
+    await teams.update(
+      movable.map((t) => t.id),
+      { gameId: game.id, score: 0 },
+    );
+
+    let state = game.state;
+    const events = manager.getRepository(GameEventEntity);
+    for (const [index, team] of movable.entries()) {
+      const event: GameEvent = {
+        type: 'TEAM_JOIN',
+        at: Date.now(),
+        actor: 'system',
+        actorId: team.id,
+        payload: { teamId: team.id, name: team.name, color: team.color },
+      };
+      state = reduce(state, event).state;
+      await events.save(
+        events.create({
+          gameId: game.id,
+          seq: index + 1,
+          type: event.type,
+          actor: event.actor,
+          actorId: team.id,
+          payload: event.payload as Record<string, unknown>,
+          eventAt: String(event.at),
+          phaseBefore: GamePhase.LOBBY,
+        }),
+      );
+    }
+
+    game.state = state;
+    game.lastSeq = movable.length;
+    await manager.getRepository(GameEntity).update(game.id, { state, lastSeq: game.lastSeq });
   }
 
   private async loadQuestions(manager: EntityManager, packIds: Uuid[] | null): Promise<FrozenQuestion[]> {

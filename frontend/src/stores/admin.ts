@@ -103,7 +103,7 @@ export const useAdminStore = defineStore('admin', () => {
   async function newGame(packIds: string[]): Promise<void> {
     await http.post('/api/game', { packIds });
     await emit('admin:resync', {});
-    ui.toast('Nowa gra gotowa — drużyny mogą dołączać', 'success');
+    ui.toast('Nowa gra gotowa — drużyny czekają w lobby', 'success');
   }
 
   function emit<T = undefined>(event: string, payload: unknown): Promise<Ack<T>> {

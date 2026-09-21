@@ -43,7 +43,8 @@ export async function freshGame(): Promise<{ token: string; main: CatalogQuestio
   const token = await adminToken(api);
   const headers = { Authorization: `Bearer ${token}` };
 
-  const created = await api.post(`${API}/api/game`, { headers, data: { packIds: [] } });
+  // Czysta karta: bez drużyn z poprzedniego testu (panel domyślnie je przenosi)
+  const created = await api.post(`${API}/api/game`, { headers, data: { packIds: [], keepTeams: false } });
   expect(created.ok(), 'utworzenie nowej gry').toBeTruthy();
 
   const list = await api.get(`${API}/api/admin/catalog/questions`, { headers });

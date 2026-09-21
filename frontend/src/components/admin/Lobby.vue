@@ -79,7 +79,7 @@ async function newGame(): Promise<void> {
     !hasGame.value ||
     (await ui.confirm({
       title: 'Zacząć nową grę?',
-      message: 'Bieżąca gra zostanie zamknięta razem z punktacją drużyn.',
+      message: 'Punktacja zostanie wyzerowana, a drużyny zostaną w lobby ze swoimi telefonami. Pytania wybierzesz od nowa.',
       confirmLabel: 'Nowa gra',
       danger: true,
     }));

@@ -252,3 +252,46 @@ test('dwóch prowadzących widzi ten sam stan gry', async ({ browser }) => {
 
   for (const context of table.contexts) await context.close();
 });
+
+test('nowa gra po finale wraca na telewizorze do lobby z tymi samymi drużynami', async ({ browser }) => {
+  const table = await setUpTable(browser);
+  const teams = await teamIds();
+  await fastForwardToLeaderboard(teams[0].id);
+
+  // Finał bez odpowiedzi — kończy się komunikatem, że zabrakło punktów
+  await table.admin.getByPlaceholder('Imię').first().fill('Ania');
+  await table.admin.getByPlaceholder('Imię').nth(1).fill('Bartek');
+  await table.admin.getByRole('button', { name: 'Rozpocznij finał' }).click();
+  for (const label of ['Zaczynamy — gracz 1', 'Start tury', 'Zakończ turę', 'Zawołaj gracza 2', 'Start tury', 'Zakończ turę']) {
+    await table.admin.getByRole('button', { name: label }).click();
+  }
+  await table.admin.getByRole('button', { name: 'Przejdź do odsłaniania' }).click();
+  for (let i = 0; i < 10; i++) {
+    await table.admin.getByRole('button', { name: `Odsłoń kolejną (${i + 1}/10)` }).click();
+  }
+  await expect(table.tv.getByTestId('tv-final-verdict')).toHaveText('ZABRAKŁO PUNKTÓW');
+
+  await table.admin.getByRole('button', { name: 'Zakończ grę' }).click();
+  await table.admin.getByRole('button', { name: 'Nowa gra' }).click();
+  await table.admin.getByTestId('confirm-yes').click();
+
+  // Telewizor sam wraca do lobby — wcześniej zostawał na ekranie końca gry
+  await expect(table.tv.getByText('DOŁĄCZ TELEFONEM')).toBeVisible();
+  await expect(table.tv.getByText('CZEKAMY NA DRUŻYNY…')).toHaveCount(0);
+  for (const { name } of table.teams) await expect(table.tv.getByText(name, { exact: true })).toBeVisible();
+
+  // Telefony zostają przy swoich drużynach, bez ponownego dołączania, z zerowym wynikiem
+  for (const { name, page } of table.teams) {
+    await expect(page.getByText(name, { exact: true })).toBeVisible();
+    await expect(page.getByPlaceholder('np. Ogórki Kiszone')).toHaveCount(0);
+  }
+  await expect(table.teams[0].page.locator('p.text-gold').first()).toHaveText('0');
+
+  // Prowadzący widzi drużyny w lobby i może od razu losować pytania
+  await expect(table.admin.getByRole('heading', { name: 'Drużyny' })).toBeVisible();
+  await expect(table.admin.getByText('Nikt jeszcze nie dołączył')).toHaveCount(0);
+  await table.admin.getByRole('button', { name: /Losuj/ }).click();
+  await expect(table.admin.getByRole('button', { name: 'Rozpocznij grę' })).toBeEnabled();
+
+  for (const context of table.contexts) await context.close();
+});

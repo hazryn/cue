@@ -45,7 +45,7 @@ const { token } = await json('/api/auth/admin', {
   body: JSON.stringify({ password: PASSWORD }),
 });
 const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-await json('/api/game', { method: 'POST', headers: auth, body: JSON.stringify({ packIds: [] }) });
+await json('/api/game', { method: 'POST', headers: auth, body: JSON.stringify({ packIds: [], keepTeams: false }) });
 
 const browser = await chromium.launch();
 const open = async (viewport, path, init) => {
