@@ -6,6 +6,7 @@ import Leaderboard from '~/components/tv/Leaderboard.vue';
 import Lobby from '~/components/tv/Lobby.vue';
 import RaceOverlay from '~/components/tv/RaceOverlay.vue';
 import Scores from '~/components/tv/Scores.vue';
+import { useKeepAwakeVideo } from '~/composables/useKeepAwakeVideo';
 import { useWakeLock } from '~/composables/useWakeLock';
 import { useAudioStore } from '~/stores/audio';
 import { useTvStore } from '~/stores/tv';
@@ -13,6 +14,8 @@ import { useTvStore } from '~/stores/tv';
 const tv = useTvStore();
 const audio = useAudioStore();
 useWakeLock();
+// Telewizory często ignorują Wake Lock — zapętlone, niewidoczne wideo trzyma ekran włączony
+const keepAwake = useKeepAwakeVideo();
 
 const view = computed(() => tv.view);
 const phase = computed(() => view.value?.phase);
@@ -21,6 +24,7 @@ const showBoard = computed(() => phase.value === 'MAIN_ROUND' && view.value?.que
 
 /** Przeglądarka nie zagra dźwięku bez interakcji — stąd ekran startowy. */
 function start(): void {
+  keepAwake.start();
   audio.unlock();
   audio.play('theme_intro');
   void document.documentElement.requestFullscreen?.().catch(() => undefined);

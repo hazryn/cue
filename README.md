@@ -81,6 +81,8 @@ Gra składa się z trzech ekranów w jednej aplikacji — każdy otwierasz na in
 
 Telefon, który przypadkiem odświeży stronę albo straci WiFi, wraca do swojej drużyny sam. Telewizor też.
 
+> **Wygaszacz w telewizorze.** Po kliknięciu ekranu startowego gra odtwarza w tle niewidoczne, wyciszone wideo — przeglądarki w telewizorach (np. Samsung) ignorują zwykłą blokadę wygaszania, ale nie włączają wygaszacza, dopóki gra wideo. Jeśli Twój telewizor mimo to przygasa, wyłącz wygaszacz w jego ustawieniach — w Samsungach to *Ustawienia → Ogólne → Menedżer systemu → Czas autoochrony* (*Auto Protection Time*).
+
 ### Runda główna
 
 Dziesięć pytań. Każda odpowiedź ma wagę „ze stu ankietowanych" — im popularniejsza, tym więcej punktów.
@@ -101,9 +103,9 @@ Zwycięska drużyna wystawia dwoje graczy i gra o nagrodę główną.
 1. Drugi gracz **wychodzi z pokoju** — telewizor przypomina o tym dużym napisem.
 2. Prowadzący czyta pięć pytań, a pierwszy gracz odpowiada. Prowadzący stuka odpowiedź z listy, a gdy padnie coś spoza niej — wpisuje to w pole (zero punktów, ale widownia zobaczy, co padło) albo zaznacza pas.
 3. Drugi gracz wraca i dostaje **te same pytania**. Telewizor nie pokazuje wtedy żadnych odpowiedzi partnera, tylko zajęte sloty. Jeśli drugi gracz powtórzy odpowiedź pierwszego, rozlega się brzęczyk i może spróbować jeszcze raz albo spasować.
-4. Odsłanianie: prowadzący klika odpowiedź po odpowiedzi, a na telewizorze widać pytanie, do którego należy każda z nich. **200 punktów lub więcej** = nagroda główna.
+4. Odsłanianie: prowadzący klika odpowiedź po odpowiedzi, a na telewizorze widać pytanie, do którego należy każda z nich. **100 punktów lub więcej** = nagroda główna.
 
-Finał nie ma zegara — tempo nadaje prowadzący. Jeśli chcecie klasycznych 20 sekund, odmierzcie je telefonem.
+Finał nie ma zegara — tempo nadaje prowadzący.
 
 ### Narzędzia prowadzącego
 

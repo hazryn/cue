@@ -25,4 +25,15 @@ test.describe('strona główna', () => {
     await expect(page.getByText(/Błędne hasło|Too Many Requests|ThrottlerException/i)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Gra', exact: true })).toHaveCount(0);
   });
+
+  test('telewizor po starcie trzyma ekran włączony zapętlonym wideo', async ({ page }) => {
+    await page.goto('/tv');
+    await page.getByText('KLIKNIJ, ABY ROZPOCZĄĆ').click();
+
+    // Telewizory ignorują Wake Lock — ekran trzyma przy życiu grające wideo
+    const video = page.locator('[data-testid="keep-awake"]');
+    await expect(video).toHaveCount(1);
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused && v.loop && v.muted)).toBe(true);
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(0);
+  });
 });
