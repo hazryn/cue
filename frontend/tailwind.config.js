@@ -20,6 +20,15 @@ export default {
         body: ['Inter', 'system-ui', 'sans-serif'],
       },
       keyframes: {
+        // Wejście karty wyniku: lekkie powiększenie, bez wychodzenia poza ekran
+        'pop-in': {
+          '0%': { transform: 'scale(0.85)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
         flip: {
           '0%': { transform: 'rotateX(90deg)', opacity: '0' },
           '100%': { transform: 'rotateX(0)', opacity: '1' },
@@ -36,6 +45,8 @@ export default {
       },
       animation: {
         flip: 'flip 320ms ease-out',
+        'pop-in': 'pop-in 450ms cubic-bezier(.2,1.2,.4,1) both',
+        'fade-in': 'fade-in 400ms ease-out both',
         'strike-in': 'strike-in 380ms cubic-bezier(.2,1.4,.4,1)',
         'pulse-ring': 'pulse-ring 1.2s ease-out infinite',
       },

@@ -18,7 +18,7 @@ const questionText = computed(() =>
 
 <template>
   <!-- Cały ekran musi zmieścić się w wysokości telewizora — stąd stałe proporcje i min-h-0 -->
-  <section class="flex h-full flex-col gap-[2.2vh] px-[5vh] py-[3.5vh]">
+  <section class="relative flex h-full flex-col gap-[2.2vh] px-[5vh] py-[3.5vh]">
     <header class="flex items-baseline justify-between">
       <p class="font-display text-[3vh] tracking-[0.4em] text-white/50">FINAŁ — {{ final.teamName }}</p>
       <p class="font-display text-[3.6vh] tracking-wide text-gold">{{ final.p1Name }} &amp; {{ final.p2Name }}</p>
@@ -90,8 +90,8 @@ const questionText = computed(() =>
         </div>
       </div>
 
-      <!-- Suma, próg i werdykt w jednym wierszu — osobna linia z werdyktem wypychała ekran poza TV -->
-      <footer v-if="revealing" class="flex items-center justify-center gap-[6vh]">
+      <!-- Podczas odsłaniania: narastająca suma i próg pod planszą -->
+      <footer v-if="final.fsm === 'F_REVEAL'" class="flex items-center justify-center gap-[6vh]">
         <div class="text-center">
           <p class="font-display text-[2.4vh] tracking-[0.3em] text-white/50">SUMA</p>
           <p data-testid="tv-final-total" class="font-display text-[9vh] leading-none text-gold">{{ final.total }}</p>
@@ -100,19 +100,50 @@ const questionText = computed(() =>
           <p class="font-display text-[2.4vh] tracking-[0.3em] text-white/50">POTRZEBA</p>
           <p data-testid="tv-final-threshold" class="font-display text-[6vh] leading-none text-white/40">{{ final.threshold }}</p>
         </div>
-        <p
-          v-if="final.won !== null"
-          data-testid="tv-final-verdict"
-          class="animate-strike-in rounded-[2vh] border-[0.4vh] px-[4vh] py-[1.5vh] font-display text-[6vh] leading-none tracking-[0.12em]"
-          :class="
-            final.won
-              ? 'border-gold bg-gold/15 text-gold shadow-[0_0_5vh_rgba(251,191,36,0.4)]'
-              : 'border-rose-400/70 bg-rose-950/50 text-rose-300'
-          "
-        >
-          {{ final.won ? 'NAGRODA GŁÓWNA!' : 'ZABRAKŁO PUNKTÓW' }}
-        </p>
       </footer>
     </template>
+
+    <!--
+      Wynik finału: karta na środku, plansza rozmyta pod spodem. Werdykt dokładany
+      do wiersza z sumą wypychał ekran poza telewizor — tu nie konkuruje o miejsce
+      z listą odpowiedzi. Bez obsługi backdrop-filter zostaje ciemna zasłona.
+    -->
+    <div
+      v-if="final.won !== null"
+      class="absolute inset-0 z-10 flex animate-fade-in items-center justify-center bg-board-deep/70 p-[5vh] backdrop-blur-[1.4vh]"
+    >
+      <div
+        data-testid="tv-final-result"
+        class="flex animate-pop-in flex-col items-center gap-[1.5vh] rounded-[4vh] border-[0.5vh] px-[10vh] py-[5vh] text-center"
+        :class="
+          final.won
+            ? 'border-gold bg-board-mid/80 shadow-[0_0_12vh_rgba(251,191,36,0.45)]'
+            : 'border-rose-400/70 bg-board-mid/80 shadow-[0_0_10vh_rgba(244,63,94,0.3)]'
+        "
+      >
+        <p class="font-display text-[3vh] tracking-[0.4em] text-white/50">FINAŁ — {{ final.teamName }}</p>
+        <p
+          data-testid="tv-final-total"
+          class="font-display text-[22vh] leading-none"
+          :class="final.won ? 'text-gold' : 'text-white'"
+        >
+          {{ final.total }}
+        </p>
+        <p class="font-display text-[3.4vh] tracking-[0.3em] text-white/60">
+          PUNKTÓW · POTRZEBA
+          <span data-testid="tv-final-threshold">{{ final.threshold }}</span>
+        </p>
+        <p
+          data-testid="tv-final-verdict"
+          class="mt-[2vh] font-display text-[9vh] leading-none tracking-[0.12em]"
+          :class="final.won ? 'text-gold drop-shadow-[0_0_4vh_rgba(251,191,36,0.6)]' : 'text-rose-300'"
+        >
+          {{ final.won ? 'NAGRODA GŁÓWNA!' : 'NIE UDAŁO SIĘ' }}
+        </p>
+        <p v-if="!final.won" class="font-display text-[3.2vh] tracking-[0.2em] text-white/50">
+          ZABRAKŁO {{ final.threshold - final.total }} PKT
+        </p>
+      </div>
+    </div>
   </section>
 </template>

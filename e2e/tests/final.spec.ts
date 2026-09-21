@@ -41,6 +41,24 @@ async function answerFinal(admin: Page, pick: (page: Page) => ReturnType<Page['g
   await expect(admin.getByTestId('final-progress')).not.toHaveText(before);
 }
 
+/**
+ * Karta wyniku finału musi zmieścić się w całości na ekranie telewizora —
+ * werdykt dokładany wcześniej pod planszą wypychał widok w dół.
+ * Mierzymy po animacji wejścia, bo startuje z pomniejszenia.
+ */
+async function expectResultFitsScreen(tv: Page): Promise<void> {
+  const card = tv.getByTestId('tv-final-result');
+  await expect(card).toBeVisible();
+  await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  const box = (await card.boundingBox())!;
+  const viewport = tv.viewportSize()!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+  const overflow = await tv.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  expect(overflow).toBeLessThanOrEqual(0);
+}
+
 test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', async ({ browser }) => {
   const table = await setUpTable(browser);
 
@@ -126,16 +144,8 @@ test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', as
   const verdict = table.tv.getByTestId('tv-final-verdict');
   const threshold = Number(await table.tv.getByTestId('tv-final-threshold').innerText());
   expect(threshold).toBe(100);
-  await expect(verdict).toHaveText(total >= threshold ? 'NAGRODA GŁÓWNA!' : 'ZABRAKŁO PUNKTÓW');
-
-  // Werdykt nie może wypchnąć ekranu poza telewizor. Mierzymy po animacji wejścia —
-  // w trakcie niej napis startuje z trzykrotnym powiększeniem.
-  await verdict.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
-  const box = await verdict.boundingBox();
-  const viewport = table.tv.viewportSize()!;
-  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
-  const overflow = await table.tv.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-  expect(overflow).toBeLessThanOrEqual(0);
+  await expect(verdict).toHaveText(total >= threshold ? 'NAGRODA GŁÓWNA!' : 'NIE UDAŁO SIĘ');
+  await expectResultFitsScreen(table.tv);
 
   // Po odsłonięciu odpowiedzi gracza 1 mogą już być widoczne
   const finalHtml = await table.tv.content();
@@ -271,7 +281,9 @@ test('nowa gra po finale wraca na telewizorze do lobby z tymi samymi drużynami'
   for (let i = 0; i < 10; i++) {
     await table.admin.getByRole('button', { name: `Odsłoń kolejną (${i + 1}/10)` }).click();
   }
-  await expect(table.tv.getByTestId('tv-final-verdict')).toHaveText('ZABRAKŁO PUNKTÓW');
+  await expect(table.tv.getByTestId('tv-final-verdict')).toHaveText('NIE UDAŁO SIĘ');
+  await expect(table.tv.getByText('ZABRAKŁO 100 PKT')).toBeVisible();
+  await expectResultFitsScreen(table.tv);
 
   await table.admin.getByRole('button', { name: 'Zakończ grę' }).click();
   await table.admin.getByRole('button', { name: 'Nowa gra' }).click();
