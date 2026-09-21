@@ -115,7 +115,12 @@ async function start(): Promise<void> {
 }
 
 async function kick(teamId: string, name: string): Promise<void> {
-  const ok = await ui.confirm({ title: `Usunąć drużynę ${name}?`, danger: true, confirmLabel: 'Usuń' });
+  const ok = await ui.confirm({
+    title: `Wyrzucić drużynę ${name}?`,
+    message: 'Jej telefon wróci do ekranu dołączania — ta sama para może dołączyć ponownie.',
+    danger: true,
+    confirmLabel: 'Wyrzuć',
+  });
   if (ok) await admin.action('TEAM_KICK', { teamId });
 }
 
@@ -151,7 +156,7 @@ async function saveRename(): Promise<void> {
           >
             Zmień
           </button>
-          <button class="btn-ghost px-3 py-1.5 text-xs" @click="kick(team.id, team.name)">Usuń</button>
+          <button class="btn-ghost px-3 py-1.5 text-xs" @click="kick(team.id, team.name)">Wyrzuć</button>
         </li>
       </ul>
 

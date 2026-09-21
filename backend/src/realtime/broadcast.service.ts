@@ -69,6 +69,21 @@ export class BroadcastService {
     for (const [, socket] of players.sockets) {
       const teamId = socket.data.teamId as Uuid | undefined;
       if (!teamId) continue;
+
+      // Drużyna wyrzucona albo nieobecna w nowej grze: telefon nie może udawać,
+      // że dalej gra — wraca do ekranu dołączania z wyjaśnieniem.
+      const team = input.state.teams.find((t) => t.id === teamId);
+      if (!team || team.removed) {
+        socket.data.teamId = undefined;
+        this.evict(
+          socket,
+          team?.removed
+            ? 'Prowadzący usunął Waszą drużynę z gry. Możecie dołączyć ponownie.'
+            : 'Prowadzący zaczął nową grę bez Waszej drużyny. Dołączcie ponownie.',
+        );
+        continue;
+      }
+
       const view = this.playerView(input, teamId);
       socket.emit('play:state', { seq: input.seq, view, sounds: [] });
       socket.emit('play:buzzer', {

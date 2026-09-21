@@ -63,6 +63,49 @@ test.describe('lobby', () => {
     await veteran.context.close();
   });
 
+  test('prowadzący wyrzuca drużynę, a jej telefon może dołączyć ponownie', async ({ browser }) => {
+    const admin = await openAdmin(browser);
+    const team = await joinAsTeam(browser, 'Intruzi');
+    const tv = await openTv(browser);
+    await expect(tv.page.getByText('Intruzi', { exact: true })).toBeVisible();
+
+    await admin.page.getByRole('button', { name: 'Wyrzuć' }).click();
+    await admin.page.getByTestId('confirm-yes').click();
+
+    // Telefon nie udaje, że dalej gra — dostaje wyjaśnienie
+    await expect(team.page.getByTestId('play-evicted')).toContainText('usunął Waszą drużynę');
+    await expect(tv.page.getByText('Intruzi', { exact: true })).toHaveCount(0);
+
+    // Ten sam telefon wraca bez przeszkód — wcześniej blokował go własny token
+    await team.page.getByRole('button', { name: 'Dołącz jeszcze raz' }).click();
+    await team.page.getByPlaceholder('np. Ogórki Kiszone').fill('Intruzi');
+    await team.page.getByRole('button', { name: 'Dołącz do gry' }).click();
+    await expect(team.page.getByTestId('buzzer')).toBeVisible();
+    await expect(tv.page.getByText('Intruzi', { exact: true })).toBeVisible();
+
+    await tv.context.close();
+    await team.context.close();
+    await admin.context.close();
+  });
+
+  test('odświeżony telefon wyrzuconej drużyny dołącza ponownie tym samym tokenem', async ({ browser }) => {
+    const admin = await openAdmin(browser);
+    const team = await joinAsTeam(browser, 'Uparci');
+
+    await admin.page.getByRole('button', { name: 'Wyrzuć' }).click();
+    await admin.page.getByTestId('confirm-yes').click();
+    await expect(team.page.getByTestId('play-evicted')).toBeVisible();
+
+    // Odświeżenie zamiast przycisku: token wciąż leży w localStorage
+    await team.page.reload();
+    await team.page.getByPlaceholder('np. Ogórki Kiszone').fill('Uparci Znowu');
+    await team.page.getByRole('button', { name: 'Dołącz do gry' }).click();
+    await expect(team.page.getByTestId('buzzer')).toBeVisible();
+
+    await team.context.close();
+    await admin.context.close();
+  });
+
   test('admin nie wystartuje gry z jedną drużyną', async ({ browser }) => {
     const admin = await openAdmin(browser);
     const solo = await joinAsTeam(browser, 'Samotnicy');

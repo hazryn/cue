@@ -17,8 +17,8 @@ onMounted(() => player.connect());
 
 <template>
   <main class="flex min-h-full flex-col items-center justify-center gap-6 px-5 py-8">
-    <div v-if="player.evicted" class="card max-w-sm text-center">
-      <p class="font-display text-3xl tracking-wide text-rose-400">Przejęto drużynę</p>
+    <div v-if="player.evicted" data-testid="play-evicted" class="card max-w-sm text-center">
+      <p class="font-display text-3xl tracking-wide text-rose-400">Poza grą</p>
       <p class="mt-2 text-sm text-white/70">{{ player.evicted }}</p>
       <button class="btn-ghost mt-4" @click="player.reset()">Dołącz jeszcze raz</button>
     </div>

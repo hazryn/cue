@@ -4,8 +4,9 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 
 @Index(['gameId'])
 // Token identyfikuje telefon w obrębie JEDNEJ gry. Globalna unikalność blokowałaby
 // powrót tego samego telefonu do kolejnej rozgrywki — a telefon trzyma token
-// w localStorage i przynosi go ze sobą po każdym „Nowa gra".
-@Index(['gameId', 'deviceToken'], { unique: true })
+// w localStorage i przynosi go ze sobą po każdym „Nowa gra". Wyrzucona drużyna
+// nie blokuje tokenu — ten sam telefon może dołączyć ponownie.
+@Index(['gameId', 'deviceToken'], { unique: true, where: 'is_removed = false' })
 export class TeamEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

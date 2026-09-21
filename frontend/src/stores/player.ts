@@ -103,12 +103,19 @@ export const usePlayerStore = defineStore('player', () => {
     });
   }
 
+  /**
+   * Powrót do ekranu dołączania — po wyrzuceniu drużyny albo przejęciu jej przez
+   * inny telefon. Łączymy się od razu na nowo, bez starego tokenu: wcześniej
+   * komunikat zostawał na ekranie i nie dało się z niego wyjść.
+   */
   function reset(): void {
     localStorage.removeItem(TOKEN_KEY);
     deviceToken.value = null;
     view.value = null;
+    evicted.value = null;
     socket?.disconnect();
     socket = null;
+    connect();
   }
 
   return { view, buzzer, connected, joining, evicted, deviceToken, clock, connect, join, buzz, rename, reset };
