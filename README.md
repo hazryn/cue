@@ -217,7 +217,7 @@ Nóż	15
 
 Pytanie rundy głównej ma 3–10 odpowiedzi, finałowe dokładnie 10; wagi sumują się najwyżej do 100. Pytania startowe leżą w [`backend/src/catalog/seed/data/`](backend/src/catalog/seed/data/).
 
-**Dźwięki.** Wszystkie 38 efektów i muzyka w lobby są syntezowane skryptem — bez sampli z sieci i bez kłopotów z licencjami:
+**Dźwięki.** Efekty dźwiękowe są syntezowane skryptem — bez sampli z sieci. Wyjątkiem jest muzyka w lobby (`lobby_music.mp3`), która jest nagraniem i gra tylko do startu gry:
 
 ```bash
 python3 tools/generate_sounds.py            # wszystkie (wymaga numpy i ffmpeg)

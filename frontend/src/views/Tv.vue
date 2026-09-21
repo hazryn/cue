@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, watch } from 'vue';
 import FinalBoard from '~/components/tv/final/Board.vue';
 import Board from '~/components/tv/Board.vue';
 import Leaderboard from '~/components/tv/Leaderboard.vue';
@@ -26,9 +26,19 @@ const showBoard = computed(() => phase.value === 'MAIN_ROUND' && view.value?.que
 function start(): void {
   keepAwake.start();
   audio.unlock();
-  audio.play('theme_intro');
+  if (phase.value === 'LOBBY') audio.play('lobby_music');
   void document.documentElement.requestFullscreen?.().catch(() => undefined);
 }
+
+/**
+ * Muzyka gra tylko w lobby, kiedy drużyny dołączają. Wcześniej startowała
+ * po kliknięciu i grała w pętli przez całą rozgrywkę, pod pytaniami i finałem.
+ */
+watch(phase, (next, prev) => {
+  if (!audio.unlocked) return;
+  if (next === 'LOBBY' && prev !== 'LOBBY') audio.play('lobby_music');
+  else if (prev === 'LOBBY' && next !== 'LOBBY') audio.stopLoop(800);
+});
 
 onMounted(() => tv.connect());
 onUnmounted(() => tv.disconnect());

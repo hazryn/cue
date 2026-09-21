@@ -55,6 +55,7 @@ export const useAudioStore = defineStore('audio', () => {
         currentLoop.currentTime = 0;
       }
       audio.loop = true;
+      audio.volume = 1; // mogła zostać wyciszona przez stopLoop z wygaszaniem
       currentLoop = audio;
     }
 
@@ -66,11 +67,31 @@ export const useAudioStore = defineStore('audio', () => {
     for (const key of keys) play(key);
   }
 
-  function stopLoop(): void {
-    if (!currentLoop) return;
-    currentLoop.pause();
-    currentLoop.currentTime = 0;
+  /** Zatrzymuje pętlę; z `fadeMs` wycisza ją łagodnie zamiast uciąć w pół taktu. */
+  function stopLoop(fadeMs = 0): void {
+    const loop = currentLoop;
+    if (!loop) return;
     currentLoop = null;
+
+    const finish = () => {
+      loop.pause();
+      loop.currentTime = 0;
+      loop.volume = 1;
+    };
+    if (fadeMs <= 0) return finish();
+
+    const steps = 20;
+    let step = 0;
+    const timer = window.setInterval(() => {
+      step += 1;
+      // Pętla mogła zostać w międzyczasie uruchomiona ponownie — wtedy nie ruszamy głośności
+      if (currentLoop === loop) return window.clearInterval(timer);
+      loop.volume = Math.max(0, 1 - step / steps);
+      if (step >= steps) {
+        window.clearInterval(timer);
+        finish();
+      }
+    }, fadeMs / steps);
   }
 
   return { unlocked, muted, missing, unlock, play, playAll, stopLoop };

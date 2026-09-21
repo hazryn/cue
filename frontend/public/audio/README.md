@@ -23,7 +23,8 @@ zaczyna od ekranu „Kliknij, aby rozpocząć".
 
 | Plik | Kiedy | Sugerowana długość |
 |---|---|---|
-| `theme_intro.mp3` | lobby, gra w pętli | 30–60 s |
+| `lobby_music.mp3` | lobby, gra w pętli tylko do startu gry; **nagranie**, nie synteza | ok. 60 s |
+| `theme_intro.mp3` | zsyntetyzowana muzyka lobby — zapasowa, obecnie nieużywana | 17 s |
 | `game_start.mp3` | start gry | 3–5 s |
 | `question_reveal.mp3` | odsłonięcie treści pytania | 1–2 s |
 | `transition.mp3` | przejście do kolejnego pytania | 1–2 s |

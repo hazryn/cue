@@ -5,6 +5,8 @@
 export const SOUNDS = [
   // ramy gry
   'theme_intro',
+  // muzyka w lobby, gdy drużyny dołączają — nagranie, nie synteza
+  'lobby_music',
   'game_start',
   'question_reveal',
   'transition',
@@ -54,4 +56,4 @@ export const SOUNDS = [
 export type SoundKey = (typeof SOUNDS)[number];
 
 /** Dźwięki zapętlone — grane do zmiany fazy, nie jednorazowo. */
-export const LOOPING_SOUNDS: SoundKey[] = ['theme_intro', 'final_tick'];
+export const LOOPING_SOUNDS: SoundKey[] = ['theme_intro', 'lobby_music', 'final_tick'];
