@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: cue
+spec:
+  replicas: 1
+  # Stan gry żyje w pamięci procesu (bufory grzybków, timery), a WebSocket trzyma
+  # połączenie — przy wymianie podów lepiej najpierw ubić stary niż mieć dwa naraz.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cue
+  template:
+    metadata:
+      labels:
+        app: cue
+    spec:
+      # Obrazy leżą w prywatnym registry klastra — ta sama konwencja co reszta apek
+      imagePullSecrets:
+        - name: registry-pull
+      containers:
+        - name: app
+          image: registry.example.com/cue/app:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 7200
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: '7200'
+            - name: TZ
+              value: Europe/Warsaw
+            - name: DB_HOST
+              value: postgres.postgres.svc.cluster.local
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_NAME
+              value: cue
+            - name: DB_USER
+              value: cue
+            - name: PUBLIC_URL
+              value: https://druzynada.example.com
+          envFrom:
+            - secretRef:
+                name: cue-secrets
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              memory: 512Mi

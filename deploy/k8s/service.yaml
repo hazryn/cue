@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  namespace: cue
+spec:
+  selector:
+    app: cue
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
