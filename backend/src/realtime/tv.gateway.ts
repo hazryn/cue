@@ -21,8 +21,8 @@ export class TvGateway implements OnGatewayInit {
 
   /** Telewizor po odświeżeniu prosi o pełny obraz — bez tego czekałby na kolejną akcję. */
   @SubscribeMessage('tv:hello')
-  async hello(): Promise<Ack<{ view: TvView }>> {
+  async hello(): Promise<Ack<{ view: TvView; serverTime: number }>> {
     const input = await this.games.publishInput();
-    return { ok: true, seq: input.seq, data: { view: this.broadcast.tvView(input) } };
+    return { ok: true, seq: input.seq, data: { view: this.broadcast.tvView(input), serverTime: Date.now() } };
   }
 }

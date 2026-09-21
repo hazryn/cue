@@ -9,6 +9,7 @@ import {
   GamePhase,
   GameState,
   QuestionState,
+  RaceState,
   TeamState,
   Uuid,
 } from '@cue/shared';
@@ -106,6 +107,19 @@ export function allSlotsRevealed(q: QuestionState): boolean {
 
 export function answerWeight(question: FrozenQuestion, answerId: Uuid): number {
   return question.answers.find((a) => a.id === answerId)?.weight ?? 0;
+}
+
+/**
+ * Moment, od którego grzybki przyjmują naciśnięcia. Przejęcie zaczyna się
+ * odliczaniem 3-2-1, żeby drużyny zdążyły wziąć telefony do ręki — wcześniejsze
+ * naciśnięcie to falstart. Stany sprzed wprowadzenia pola nie mają `armsAt`.
+ */
+export function raceArmsAt(race: RaceState): number {
+  return race.armsAt ?? race.openedAt;
+}
+
+export function stealArmsAt(state: GameState, at: number): number {
+  return at + (state.config.stealCountdownMs ?? DEFAULT_CONFIG.stealCountdownMs);
 }
 
 export function clone<T>(value: T): T {

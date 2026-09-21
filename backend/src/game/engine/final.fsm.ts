@@ -209,7 +209,7 @@ export function revealNext(state: GameState, final: FinalState, sounds: SoundKey
 
   if (final.revealCursor >= ordered.length) {
     final.fsm = 'F_RESULT';
-    sounds.push(final.total >= state.config.finalThreshold ? 'final_win' : 'final_lose');
+    sounds.push(final.total >= state.config.finalThreshold ? 'final_fanfare' : 'final_lose');
   }
 }
 

@@ -51,11 +51,13 @@ export class BroadcastService {
     this.namespaces.get(NS.TV)?.emit('tv:state', {
       seq: input.seq,
       view: projectTv(input.state, ctx),
+      serverTime: Date.now(),
       sounds: input.sounds,
     });
     this.namespaces.get(NS.ADMIN)?.emit('admin:state', {
       seq: input.seq,
       view: projectAdmin(input.state, ctx),
+      serverTime: Date.now(),
       sounds: input.sounds,
     });
     this.publishPlayers(input);
@@ -91,6 +93,7 @@ export class BroadcastService {
         armed: view.armed,
         reason: view.armedReason,
         openedAt: input.state.question?.race?.openedAt ?? null,
+        armsAt: view.raceArmsAt,
       });
     }
   }

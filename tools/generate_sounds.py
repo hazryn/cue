@@ -151,6 +151,12 @@ def s_race_open() -> np.ndarray:
     return fade(reverb(seq(beep1, silence(0.03), beep2) * 0.9, 0.18))
 
 
+def s_countdown_tick() -> np.ndarray:
+    # Pojedynczy, niższy sygnał na każdą cyfrę — race_open po nim brzmi jak „start"
+    body = sine(note('A4'), 0.18) * perc(0.18, 11) * 0.8 + sine(note('A5'), 0.18) * perc(0.18, 16) * 0.2
+    return fade(reverb(body, 0.12))
+
+
 def s_buzz() -> np.ndarray:
     click = (square(320, 0.09, 0.35) * 0.5 + noise(0.09, seed=2) * 0.5) * perc(0.09, 26)
     return fade(lowpass(click, 3000))

@@ -26,6 +26,8 @@ export const useAdminStore = defineStore('admin', () => {
   const authError = ref<string | null>(null);
   const lastRace = ref<RaceResultView | null>(null);
   const raceLog = ref<RaceResultView[]>([]);
+  /** Różnica zegarów serwer − urządzenie prowadzącego, do podglądu odliczania */
+  const serverOffsetMs = ref(0);
   let socket: Socket | null = null;
 
   const loggedIn = computed(() => Boolean(token.value));
@@ -67,7 +69,10 @@ export const useAdminStore = defineStore('admin', () => {
         logout();
       }
     });
-    socket.on('admin:state', (patch: StatePatch<AdminView>) => (view.value = patch.view));
+    socket.on('admin:state', (patch: StatePatch<AdminView>) => {
+      view.value = patch.view;
+      if (patch.serverTime) serverOffsetMs.value = patch.serverTime - Date.now();
+    });
     socket.on('admin:race', (result: RaceResultView) => {
       lastRace.value = result;
       raceLog.value = [result, ...raceLog.value].slice(0, 12);
@@ -129,6 +134,7 @@ export const useAdminStore = defineStore('admin', () => {
     loggedIn,
     lastRace,
     raceLog,
+    serverOffsetMs,
     login,
     logout,
     connect,

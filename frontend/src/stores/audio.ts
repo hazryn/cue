@@ -1,4 +1,4 @@
-import { LOOPING_SOUNDS } from '@cue/shared';
+import { BACKGROUND_SOUNDS, LOOPING_SOUNDS } from '@cue/shared';
 import type { SoundKey } from '@cue/shared';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
@@ -49,12 +49,12 @@ export const useAudioStore = defineStore('audio', () => {
     if (!unlocked.value || muted.value) return;
     const audio = element(key);
 
-    if (LOOPING_SOUNDS.includes(key)) {
+    if (LOOPING_SOUNDS.includes(key) || BACKGROUND_SOUNDS.includes(key)) {
       if (currentLoop && currentLoop !== audio) {
         currentLoop.pause();
         currentLoop.currentTime = 0;
       }
-      audio.loop = true;
+      audio.loop = LOOPING_SOUNDS.includes(key);
       audio.volume = 1; // mogła zostać wyciszona przez stopLoop z wygaszaniem
       currentLoop = audio;
     }

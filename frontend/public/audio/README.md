@@ -34,6 +34,7 @@ zaczyna od ekranu „Kliknij, aby rozpocząć".
 | Plik | Kiedy | Długość |
 |---|---|---|
 | `race_open.mp3` | grzybki odblokowane | 0,5–1 s |
+| `countdown_tick.mp3` | cyfra odliczania 3-2-1 przed przejęciem | 0,2 s |
 | `buzz.mp3` | naciśnięcie grzybka | 0,3–0,5 s |
 | `buzz_win.mp3` | ogłoszenie zwycięzcy wyścigu | 1–2 s |
 | `tiebreak.mp3` | remis → dogrywka | 1–2 s |
@@ -78,7 +79,8 @@ zaczyna od ekranu „Kliknij, aby rozpocząć".
 | `duplicate_buzz.mp3` | gracz 2 powtórzył odpowiedź partnera | 1–1,5 s |
 | `final_reveal.mp3` | odsłonięcie slotu z punktami | 0,5–1 s |
 | `final_reveal_zero.mp3` | odsłonięcie slotu bez punktów | 0,5–1 s |
-| `final_win.mp3` | suma finału osiąga próg (domyślnie 100) | 5–10 s |
+| `final_fanfare.mp3` | nagroda główna — suma finału osiąga próg (domyślnie 100); **nagranie**, grane raz, 5 s po ostatnim odsłonięciu | ok. 2 min |
+| `final_win.mp3` | zsyntetyzowana fanfara wygranej — zapasowa, obecnie nieużywana | 5–10 s |
 | `final_lose.mp3` | suma finału poniżej progu | 3–5 s |
 
 > **Uwaga na `final_ok.mp3`.** Ten dźwięk brzmi tak samo przy trafieniu i przy

@@ -74,11 +74,20 @@ test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', as
   await table.admin.getByPlaceholder('Imię').nth(1).fill('Bartek');
   await table.admin.getByRole('button', { name: 'Rozpocznij finał' }).click();
 
+  // Gracz 2 wychodzi, zanim telewizor pokaże planszę finału
+  const gate = table.tv.getByTestId('tv-final-gate');
+  await expect(gate).toContainText('OPUŚĆ POKÓJ');
+  await expect(gate).toContainText('Bartek');
+  await expect(table.tv.getByTestId('tv-final-slot')).toHaveCount(0);
+
   await table.admin.getByRole('button', { name: 'Zaczynamy — gracz 1' }).click();
-  await expect(table.tv.getByText('OPUŚĆ POKÓJ')).toBeVisible();
-  await expect(table.tv.getByText('Bartek').first()).toBeVisible();
+  await expect(gate).toBeHidden();
+  await expect(table.tv.getByTestId('tv-final-slot').first()).toBeVisible();
+  // Pytanie dopiero po „Start tury" — gracz 1 jeszcze siada przed telewizorem
+  await expect(table.tv.getByTestId('tv-final-question')).toHaveCount(0);
 
   await table.admin.getByRole('button', { name: 'Start tury' }).click();
+  await expect(table.tv.getByTestId('tv-final-question')).toBeVisible();
 
   // --- tura gracza 1 --------------------------------------------------------
   const player1Answers: string[] = [];
@@ -91,6 +100,9 @@ test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', as
 
   // --- gracz 2 wraca i patrzy na telewizor ---------------------------------
   await table.admin.getByRole('button', { name: 'Zawołaj gracza 2' }).click();
+  await expect(gate).toContainText('WRACA DO GRY');
+  await expect(gate).toContainText('Bartek');
+  await expect(gate).not.toContainText('Ania');
   await table.admin.getByRole('button', { name: 'Start tury' }).click();
 
   const tvHtml = await table.tv.content();
@@ -139,9 +151,15 @@ test('finał: duplikaty, szczelność telewizora i odsłanianie z pytaniami', as
     if (i < 9) await expect(table.tv.getByTestId('tv-final-question')).toHaveText(question);
   }
 
+  // Werdykt wjeżdża dopiero po kilku sekundach — najpierw widać ostatnie odsłonięcie i sumę
+  await expect(table.admin.getByRole('button', { name: 'Zakończ grę' })).toBeVisible();
+  const verdict = table.tv.getByTestId('tv-final-verdict');
+  await expect(verdict).toBeHidden();
+  await expect(table.tv.getByTestId('tv-final-question')).toBeVisible();
+  await expect(verdict).toBeVisible({ timeout: 8000 });
+
   const total = Number(await table.tv.getByTestId('tv-final-total').innerText());
   expect(total).toBeGreaterThan(0);
-  const verdict = table.tv.getByTestId('tv-final-verdict');
   const threshold = Number(await table.tv.getByTestId('tv-final-threshold').innerText());
   expect(threshold).toBe(100);
   await expect(verdict).toHaveText(total >= threshold ? 'NAGRODA GŁÓWNA!' : 'NIE UDAŁO SIĘ');
@@ -281,7 +299,7 @@ test('nowa gra po finale wraca na telewizorze do lobby z tymi samymi drużynami'
   for (let i = 0; i < 10; i++) {
     await table.admin.getByRole('button', { name: `Odsłoń kolejną (${i + 1}/10)` }).click();
   }
-  await expect(table.tv.getByTestId('tv-final-verdict')).toHaveText('NIE UDAŁO SIĘ');
+  await expect(table.tv.getByTestId('tv-final-verdict')).toHaveText('NIE UDAŁO SIĘ', { timeout: 8000 });
   await expect(table.tv.getByText('ZABRAKŁO 100 PKT')).toBeVisible();
   await expectResultFitsScreen(table.tv);
 

@@ -1,14 +1,43 @@
 <script setup lang="ts">
 import type { TvFinalView } from '@cue/shared';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useAudioStore } from '~/stores/audio';
+import { FINAL_RESULT_DELAY_MS } from './resultDelay';
 
 const props = defineProps<{ final: TvFinalView }>();
 
 const player1Slots = computed(() => props.final.slots.filter((s) => s.player === 1));
 const player2Slots = computed(() => props.final.slots.filter((s) => s.player === 2));
 const revealing = computed(() => props.final.fsm === 'F_REVEAL' || props.final.fsm === 'F_RESULT');
-const waitingForPlayer = computed(() => props.final.fsm === 'F_P1_READY' || props.final.fsm === 'F_P2_READY');
+/**
+ * Bramka organizacyjna dotyczy zawsze gracza 2: zaraz po starcie finału musi
+ * wyjść z pokoju, zanim plansza w ogóle się pokaże, a przed swoją turą wraca.
+ */
+const leavingRoom = computed(() => props.final.fsm === 'F_SETUP');
+const returning = computed(() => props.final.fsm === 'F_P2_READY');
 const activePlayerName = computed(() => (props.final.turn === 1 ? props.final.p1Name : props.final.p2Name));
+
+/**
+ * Werdykt po FINAL_RESULT_DELAY_MS od ostatniego odsłonięcia. Telewizor odświeżony
+ * już po wyniku pokazuje go od razu — nie ma na co czekać.
+ */
+const audio = useAudioStore();
+const showResult = ref(props.final.won !== null);
+let resultTimer: ReturnType<typeof setTimeout> | null = null;
+watch(
+  () => props.final.won,
+  (won, previous) => {
+    if (resultTimer) clearTimeout(resultTimer);
+    resultTimer = null;
+    if (won === null) {
+      showResult.value = false;
+      // Cofnięcie ostatniego odsłonięcia: fanfara nie może grać dalej
+      if (previous) audio.stopLoop(500);
+    }
+    else if (previous === null) resultTimer = setTimeout(() => (showResult.value = true), FINAL_RESULT_DELAY_MS);
+  },
+);
+onBeforeUnmount(() => resultTimer && clearTimeout(resultTimer));
 
 /** W turze: pytanie, na które gracz właśnie odpowiada; przy odsłanianiu — to, którego dotyczy odsłonięta odpowiedź. */
 const questionText = computed(() =>
@@ -25,12 +54,14 @@ const questionText = computed(() =>
     </header>
 
     <!-- Bramka organizacyjna: bez niej gracz 2 zostaje w pokoju i finał jest do wyrzucenia -->
-    <div v-if="waitingForPlayer" class="flex flex-1 flex-col items-center justify-center gap-[2vh] text-center">
-      <p class="font-display text-[8vh] leading-tight tracking-wide text-rose-400">
-        {{ final.turn === 1 ? final.p2Name : final.p1Name }}
-      </p>
+    <div
+      v-if="leavingRoom || returning"
+      data-testid="tv-final-gate"
+      class="flex flex-1 flex-col items-center justify-center gap-[2vh] text-center"
+    >
+      <p class="font-display text-[8vh] leading-tight tracking-wide text-rose-400">{{ final.p2Name }}</p>
       <p class="font-display text-[5vh] tracking-[0.2em]">
-        {{ final.turn === 1 ? 'OPUŚĆ POKÓJ' : 'WRACA DO GRY' }}
+        {{ leavingRoom ? 'OPUŚĆ POKÓJ' : 'WRACA DO GRY' }}
       </p>
       <p class="max-w-[80vh] text-[2.5vh] text-white/60">
         Prowadzący startuje turę dopiero, gdy wszyscy są na swoich miejscach.
@@ -39,10 +70,10 @@ const questionText = computed(() =>
 
     <template v-else>
       <div class="flex min-h-[11vh] flex-col items-center justify-center text-center">
-        <p v-if="!revealing && final.turn" class="font-display text-[2.6vh] tracking-[0.3em] text-white/50">
+        <p v-if="!revealing && final.currentQuestionText" class="font-display text-[2.6vh] tracking-[0.3em] text-white/50">
           ODPOWIADA {{ activePlayerName }} — PYTANIE {{ final.qCursor + 1 }}/{{ final.questionCount }}
         </p>
-        <p v-else-if="final.fsm === 'F_REVEAL'" class="font-display text-[2.6vh] tracking-[0.3em] text-white/50">
+        <p v-else-if="revealing" class="font-display text-[2.6vh] tracking-[0.3em] text-white/50">
           PYTANIE
         </p>
         <p
@@ -91,7 +122,7 @@ const questionText = computed(() =>
       </div>
 
       <!-- Podczas odsłaniania: narastająca suma i próg pod planszą -->
-      <footer v-if="final.fsm === 'F_REVEAL'" class="flex items-center justify-center gap-[6vh]">
+      <footer v-if="revealing && !showResult" class="flex items-center justify-center gap-[6vh]">
         <div class="text-center">
           <p class="font-display text-[2.4vh] tracking-[0.3em] text-white/50">SUMA</p>
           <p data-testid="tv-final-total" class="font-display text-[9vh] leading-none text-gold">{{ final.total }}</p>
@@ -109,7 +140,7 @@ const questionText = computed(() =>
       z listą odpowiedzi. Bez obsługi backdrop-filter zostaje ciemna zasłona.
     -->
     <div
-      v-if="final.won !== null"
+      v-if="final.won !== null && showResult"
       class="absolute inset-0 z-10 flex animate-fade-in items-center justify-center bg-board-deep/70 p-[5vh] backdrop-blur-[1.4vh]"
     >
       <div

@@ -91,7 +91,7 @@ Dziesięć pytań. Każda odpowiedź ma wagę „ze stu ankietowanych" — im po
 2. Drużyna, która **pierwsza naciśnie grzybek**, odpowiada na głos. Kto był pierwszy, rozstrzyga serwer po zsynchronizowaniu zegarów telefonów, a nie to, czyj pakiet szybciej doleciał przez WiFi.
 3. Prowadzący stuka trafioną odpowiedź na swoim telefonie — odsłania się na TV, a jej punkty trafiają do puli. Pudło to **✖**.
 4. Drużyna odpowiada, dopóki nie zbierze **trzech X-ów** albo nie odsłoni całej planszy — wtedy zgarnia pulę.
-5. **Przejęcie:** po trzecim X o pulę walczą pozostałe drużyny — przy trzech drużynach kolejnym grzybkiem, przy dwóch od razu przeciwnik. Przejmujący ma **jedną próbę**: jeśli trafi, bierze całą pulę razem z punktami swojej odpowiedzi.
+5. **Przejęcie:** po trzecim X o pulę walczą pozostałe drużyny — przy trzech drużynach kolejnym grzybkiem (po odliczaniu 3-2-1 na telewizorze i telefonach, żeby wszyscy zdążyli sięgnąć po grzybek), przy dwóch od razu przeciwnik. Przejmujący ma **jedną próbę**: jeśli trafi, bierze całą pulę razem z punktami swojej odpowiedzi.
 6. Jeśli spudłują wszyscy, pula przepada, a prowadzący odsłania pozostałe odpowiedzi po jednej.
 
 **Od szóstego pytania punkty liczą się podwójnie.** Po dziesiątym telewizor pokazuje ranking i zwycięzcę.
@@ -100,7 +100,7 @@ Dziesięć pytań. Każda odpowiedź ma wagę „ze stu ankietowanych" — im po
 
 Zwycięska drużyna wystawia dwoje graczy i gra o nagrodę główną.
 
-1. Drugi gracz **wychodzi z pokoju** — telewizor przypomina o tym dużym napisem.
+1. Drugi gracz **wychodzi z pokoju** — zaraz po starcie finału telewizor przypomina o tym dużym napisem, a plansza pojawia się dopiero, gdy prowadzący zawoła gracza 1.
 2. Prowadzący czyta pięć pytań, a pierwszy gracz odpowiada. Prowadzący stuka odpowiedź z listy, a gdy padnie coś spoza niej — wpisuje to w pole (zero punktów, ale widownia zobaczy, co padło) albo zaznacza pas.
 3. Drugi gracz wraca i dostaje **te same pytania**. Telewizor nie pokazuje wtedy żadnych odpowiedzi partnera, tylko zajęte sloty. Jeśli drugi gracz powtórzy odpowiedź pierwszego, rozlega się brzęczyk i może spróbować jeszcze raz albo spasować.
 4. Odsłanianie: prowadzący klika odpowiedź po odpowiedzi, a na telewizorze widać pytanie, do którego należy każda z nich. **100 punktów lub więcej** = nagroda główna.

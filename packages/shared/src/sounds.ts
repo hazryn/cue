@@ -12,6 +12,8 @@ export const SOUNDS = [
   'transition',
   // wyścig
   'race_open',
+  // odliczanie 3-2-1 przed odblokowaniem grzybków przy przejęciu (raz na cyfrę)
+  'countdown_tick',
   'buzz',
   'buzz_win',
   'tiebreak',
@@ -47,6 +49,8 @@ export const SOUNDS = [
   'final_reveal',
   'final_reveal_zero',
   'final_win',
+  // nagranie (nie synteza) grane przy nagrodzie głównej zamiast final_win — ok. 2 min, raz
+  'final_fanfare',
   'final_lose',
   // admin (lokalnie, nie na TV)
   'error',
@@ -57,3 +61,9 @@ export type SoundKey = (typeof SOUNDS)[number];
 
 /** Dźwięki zapętlone — grane do zmiany fazy, nie jednorazowo. */
 export const LOOPING_SOUNDS: SoundKey[] = ['theme_intro', 'lobby_music', 'final_tick'];
+
+/**
+ * Długie nagrania grane raz, ale jak muzyka w tle: zajmują miejsce pętli, więc
+ * kolejna muzyka (np. lobby nowej gry) albo stopLoop je wycisza.
+ */
+export const BACKGROUND_SOUNDS: SoundKey[] = ['final_fanfare'];

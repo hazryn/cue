@@ -10,6 +10,7 @@ import {
   answerWeight,
   currentQuestion,
   findTeam,
+  stealArmsAt,
   stealCandidates,
 } from './state';
 import { awardPool, poolIncrement } from './scoring';
@@ -105,6 +106,7 @@ export function enterStealPhase(state: GameState, q: QuestionState, sounds: Soun
     kind: 'STEAL',
     eligible: candidates.map((c) => c.id),
     openedAt: at,
+    armsAt: stealArmsAt(state, at),
     closesAt: null,
   };
   sounds.push('steal_open');

@@ -35,6 +35,8 @@ export interface RaceView {
   kind: RaceKind;
   eligible: Uuid[];
   openedAt: Ms;
+  /** Moment odblokowania grzybków (czas serwera) — do niego odliczają TV i telefony */
+  armsAt: Ms;
 }
 
 /** Slot rundy głównej. `text` i `weight` są null dopóki slot nie jest odsłonięty. */
@@ -251,6 +253,8 @@ export interface PlayerView {
   armedReason: ArmedReason;
   raceId: Uuid | null;
   raceKind: RaceKind | null;
+  /** Od kiedy (czas serwera) grzybek przyjmuje naciśnięcia — przy przejęciu po odliczaniu 3-2-1 */
+  raceArmsAt: Ms | null;
   /** Wynik ostatniego wyścigu z perspektywy tej drużyny */
   lastRace: { raceId: Uuid; won: boolean; winnerTeamName: string } | null;
   /** Czy ta drużyna właśnie odpowiada */

@@ -86,12 +86,25 @@ test.describe('runda główna', () => {
 
     await expect(table.admin.getByText('Przejęcie')).toBeVisible();
 
-    // Do przejęcia stają tylko drużyny, które jeszcze nie próbowały
-    await table.admin.getByRole('button', { name: 'Odblokuj grzybki' }).click();
+    // Do przejęcia stają tylko drużyny, które jeszcze nie próbowały — wyścig rusza sam,
+    // ale grzybki ożywają dopiero po odliczaniu 3-2-1
     await expect(table.tv.getByText('PRZEJĘCIE — KTO PIERWSZY?')).toBeVisible();
+    await expect(table.tv.getByTestId('tv-race-countdown')).toBeVisible();
+    // Wyścig już trwa — prowadzący widzi odliczanie i anulowanie, nie drugie „Odblokuj"
+    await expect(table.admin.getByRole('button', { name: 'Odblokuj grzybki' })).toHaveCount(0);
+    await expect(table.admin.getByRole('button', { name: 'Anuluj wyścig' })).toBeVisible();
+    const stealer = table.teams[1].page.getByTestId('buzzer');
+    await expect(stealer).toHaveAttribute('data-countdown', /[123]/);
+    await expect(stealer).toHaveAttribute('data-armed', 'false');
     await expect(table.teams[0].page.getByTestId('buzzer')).toHaveAttribute('data-armed', 'false');
     await expect(table.teams[0].page.getByTestId('buzzer')).toHaveText('Nie wasza kolej');
-    await expect(table.teams[1].page.getByTestId('buzzer')).toHaveAttribute('data-armed', 'true');
+
+    await expect(stealer).toHaveAttribute('data-armed', 'true', { timeout: 6000 });
+    await expect(stealer).toHaveText('BIJ!');
+    await expect(table.tv.getByText('GRZYBKI ODBLOKOWANE')).toBeVisible();
+
+    await stealer.click();
+    await expect(table.admin.getByText(/przejęcie — jedna próba/)).toBeVisible();
 
     await closeAll(table);
   });

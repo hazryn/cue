@@ -104,6 +104,11 @@ export interface RaceState {
   kind: RaceKind;
   eligible: Uuid[];
   openedAt: Ms;
+  /**
+   * Od kiedy grzybki są aktywne. Przy przejęciu to openedAt + odliczanie 3-2-1,
+   * przy zwykłym starcie pytania — openedAt. Starsze stany gry nie mają pola.
+   */
+  armsAt?: Ms;
   /** Koniec okna zbierania naciśnięć; null = okno jeszcze nie ruszyło */
   closesAt: Ms | null;
 }
@@ -179,6 +184,8 @@ export interface GameConfig {
   tiebreakThresholdMs: number;
   /** Blokada po falstarcie [ms] */
   falseStartLockoutMs: number;
+  /** Odliczanie 3-2-1 przed odblokowaniem grzybków przy przejęciu [ms] */
+  stealCountdownMs: number;
   /** Po tylu ms bez naciśnięcia zamykamy wyścig, żeby FSM nie wisiał [ms] */
   raceTimeoutMs: number;
   /** Od którego indeksu pytania (0-based) obowiązuje mnożnik */
@@ -193,6 +200,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   raceWindowMs: 250,
   tiebreakThresholdMs: 10,
   falseStartLockoutMs: 500,
+  stealCountdownMs: 3000,
   raceTimeoutMs: 60_000,
   multiplierFromIndex: 5,
   multiplier: 2,

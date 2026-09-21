@@ -68,6 +68,29 @@ describe('przejęcie', () => {
     expect(s.question!.pool).toBe(40);
   });
 
+  it('grzybki przejęcia odblokowują się dopiero po odliczaniu 3-2-1', () => {
+    const { state, teamIds } = startedGame();
+    let s = winRace(state, teamIds[0]);
+    s = strikeOut(s);
+
+    const race = s.question!.race!;
+    expect(race.armsAt! - race.openedAt).toBe(s.config.stealCountdownMs);
+    expect(s.config.stealCountdownMs).toBe(3000);
+
+    // Ponowne odblokowanie przez prowadzącego też zaczyna się od odliczania
+    s = apply(s, { type: 'ADMIN_CANCEL_RACE', at: tick(), actor: 'admin', payload: {} });
+    const at = tick();
+    s = apply(s, { type: 'ADMIN_OPEN_RACE', at, actor: 'admin', payload: { raceId: 'again' } });
+    expect(s.question!.race!.armsAt).toBe(at + 3000);
+  });
+
+  it('zwykły wyścig o pytanie startuje bez odliczania', () => {
+    const { state } = startedGame();
+    const at = tick();
+    const s = apply(state, { type: 'ADMIN_OPEN_RACE', at, actor: 'admin', payload: { raceId: 'r1' } });
+    expect(s.question!.race!.armsAt).toBe(at);
+  });
+
   it('przy dwóch drużynach przejęcie idzie od razu do drugiej, bez wyścigu', () => {
     const { state, teamIds } = startedGame({ teams: ['Czerwoni', 'Zieloni'] });
     let s = winRace(state, teamIds[0]);

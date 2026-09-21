@@ -43,7 +43,7 @@ export class AdminGateway implements OnGatewayInit, OnGatewayConnection {
 
   async handleConnection(socket: Socket): Promise<void> {
     const input = await this.games.publishInput().catch(() => null);
-    if (input) socket.emit('admin:state', { seq: input.seq, view: this.broadcast.adminView(input), sounds: [] });
+    if (input) socket.emit('admin:state', { seq: input.seq, view: this.broadcast.adminView(input), serverTime: Date.now(), sounds: [] });
   }
 
   @SubscribeMessage('admin:action')

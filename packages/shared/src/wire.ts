@@ -36,6 +36,8 @@ export type Ack<T = undefined> =
 export interface StatePatch<V> {
   seq: number;
   view: V;
+  /** Czas serwera przy wysyłce — ekran bez synchronizacji zegara liczy z niego odliczanie */
+  serverTime?: Ms;
   /** Dźwięki do odtworzenia przy tej zmianie (tylko /tv i lokalnie /admin) */
   sounds: SoundKey[];
 }
@@ -46,6 +48,8 @@ export interface BuzzerArm {
   reason: PlayerView['armedReason'];
   /** Serwerowy czas otwarcia wyścigu — telefon liczy własny falstart */
   openedAt: Ms | null;
+  /** Od kiedy (czas serwera) grzybek jest aktywny — wcześniej telefon odlicza 3-2-1 */
+  armsAt: Ms | null;
 }
 
 export interface RacePressView {
@@ -150,5 +154,5 @@ export interface ClientToAdmin {
 }
 
 export interface ClientToTv {
-  'tv:hello': (req: Record<string, never>, ack: (r: Ack<{ view: TvView }>) => void) => void;
+  'tv:hello': (req: Record<string, never>, ack: (r: Ack<{ view: TvView; serverTime: Ms }>) => void) => void;
 }

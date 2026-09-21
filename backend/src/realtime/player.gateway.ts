@@ -187,6 +187,7 @@ export class PlayerGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       armed: view.armed,
       reason: view.armedReason,
       openedAt: input.state.question?.race?.openedAt ?? null,
+      armsAt: view.raceArmsAt,
     });
     await this.republish();
     return view;

@@ -18,6 +18,8 @@ import {
   GameState,
   PlayerView,
   PresenceEntry,
+  RaceState,
+  RaceView,
   SlotView,
   TeamView,
   TvFinalSlotView,
@@ -27,7 +29,7 @@ import {
   UndoEntry,
   Uuid,
 } from '@cue/shared';
-import { activeTeams, questionById } from './state';
+import { activeTeams, questionById, raceArmsAt } from './state';
 import { orderedSlots } from './final.fsm';
 import { ranking } from './scoring';
 
@@ -97,7 +99,7 @@ function tvQuestion(state: GameState): TvQuestionView | null {
     stealingTeamId: q.stealingTeamId,
     strikes: q.strikes,
     triedTeamIds: q.triedTeamIds,
-    race: q.race ? { id: q.race.id, kind: q.race.kind, eligible: q.race.eligible, openedAt: q.race.openedAt } : null,
+    race: q.race ? raceView(q.race) : null,
     awardedTo: q.awardedTo,
     awardedAmount: q.awardedAmount,
     forfeited: q.forfeited,
@@ -115,7 +117,9 @@ function tvFinal(state: GameState): TvFinalView | null {
   const team = state.teams.find((t) => t.id === final.teamId);
   const revealing = finalRevealPhase(final);
   const currentQuestion = questionById(state, final.questionIds[final.qCursor] ?? '');
-  const turnRunning = final.turn !== null && !revealing;
+  // Pytanie pojawia się dopiero po „Start tury" — przed nim gracz jeszcze
+  // siada przed telewizorem i nie powinien mieć czasu na zastanowienie.
+  const turnRunning = ['F_P1_RUNNING', 'F_P1_PAUSED', 'F_P2_RUNNING', 'F_P2_PAUSED'].includes(final.fsm);
   const ordered = orderedSlots(final);
   // Ostatnio odsłonięty slot; przed pierwszym kliknięciem — pierwszy w kolejce
   const focus = revealing ? ordered[Math.max(final.revealCursor - 1, 0)] : undefined;
@@ -138,7 +142,8 @@ function tvFinal(state: GameState): TvFinalView | null {
       result: resultVisible ? slot.result : null,
       text: revealing && slot.revealed ? answer : null,
       points: revealing && slot.revealed ? slot.points : null,
-      current: final.fsm === 'F_REVEAL' && final.revealCursor > 0 && slot === focus,
+      // Także w F_RESULT: telewizor przez chwilę pokazuje ostatnie odsłonięcie, zanim wjedzie werdykt
+      current: revealing && final.revealCursor > 0 && slot === focus,
     };
   });
 
@@ -154,7 +159,7 @@ function tvFinal(state: GameState): TvFinalView | null {
     currentQuestionText: turnRunning ? (currentQuestion?.text ?? null) : null,
     // Pytania nie są tajne — gracze je słyszeli — więc pokazujemy je bez ograniczeń
     revealQuestionText:
-      final.fsm === 'F_REVEAL' && focus ? questionTextOf(state, final, focus.qIdx) : null,
+      revealing && focus ? questionTextOf(state, final, focus.qIdx) : null,
     slots,
     revealCursor: final.revealCursor,
     total: revealing ? final.total : 0,
@@ -238,7 +243,7 @@ function adminQuestion(state: GameState): AdminQuestionView | null {
     stealingTeamId: q.stealingTeamId,
     strikes: q.strikes,
     triedTeamIds: q.triedTeamIds,
-    race: q.race ? { id: q.race.id, kind: q.race.kind, eligible: q.race.eligible, openedAt: q.race.openedAt } : null,
+    race: q.race ? raceView(q.race) : null,
     awardedTo: q.awardedTo,
     awardedAmount: q.awardedAmount,
     forfeited: q.forfeited,
@@ -349,9 +354,14 @@ export function projectPlayer(state: GameState, ctx: PlayerContext): PlayerView 
     armedReason: reason,
     raceId: race?.id ?? null,
     raceKind: race?.kind ?? null,
+    raceArmsAt: race ? raceArmsAt(race) : null,
     lastRace: ctx.lastRace,
     hasControl: q?.controllingTeamId === ctx.teamId || q?.stealingTeamId === ctx.teamId,
     strikes: q?.controllingTeamId === ctx.teamId ? (q?.strikes ?? 0) : 0,
     teams: teamViews(state, ctx),
   };
+}
+
+function raceView(race: RaceState): RaceView {
+  return { id: race.id, kind: race.kind, eligible: race.eligible, openedAt: race.openedAt, armsAt: raceArmsAt(race) };
 }

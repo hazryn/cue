@@ -6,6 +6,7 @@ import Leaderboard from '~/components/tv/Leaderboard.vue';
 import Lobby from '~/components/tv/Lobby.vue';
 import RaceOverlay from '~/components/tv/RaceOverlay.vue';
 import Scores from '~/components/tv/Scores.vue';
+import { newVersionAvailable } from '~/api/version';
 import { useKeepAwakeVideo } from '~/composables/useKeepAwakeVideo';
 import { useWakeLock } from '~/composables/useWakeLock';
 import { useAudioStore } from '~/stores/audio';
@@ -22,6 +23,10 @@ const phase = computed(() => view.value?.phase);
 const race = computed(() => view.value?.question?.race ?? null);
 const showBoard = computed(() => phase.value === 'MAIN_ROUND' && view.value?.question);
 
+function reload(): void {
+  window.location.reload();
+}
+
 /** Przeglądarka nie zagra dźwięku bez interakcji — stąd ekran startowy. */
 function start(): void {
   keepAwake.start();
@@ -36,8 +41,17 @@ function start(): void {
  */
 watch(phase, (next, prev) => {
   if (!audio.unlocked) return;
-  if (next === 'LOBBY' && prev !== 'LOBBY') audio.play('lobby_music');
+  if (next === 'LOBBY' && prev !== 'LOBBY') {
+    // Fanfara finału mogła jeszcze grać — wycisza się pod muzyką lobby
+    audio.stopLoop(800);
+    audio.play('lobby_music');
+  }
   else if (prev === 'LOBBY' && next !== 'LOBBY') audio.stopLoop(800);
+});
+
+// Na ekranie startowym nic nie tracimy — przeładowanie od razu; w trakcie gry prosimy o klik
+watch(newVersionAvailable, (isNew) => {
+  if (isNew && !audio.unlocked) window.location.reload();
 });
 
 onMounted(() => tv.connect());
@@ -55,6 +69,15 @@ onUnmounted(() => tv.disconnect());
       <p class="font-display text-[4vh] tracking-[0.3em] text-white/60">KLIKNIJ, ABY ROZPOCZĄĆ</p>
       <p class="text-[2.2vh] text-white/40">Włączy dźwięk i tryb pełnoekranowy</p>
     </div>
+
+    <button
+      v-if="newVersionAvailable && audio.unlocked"
+      data-testid="tv-new-version"
+      class="absolute left-1/2 top-[2vh] z-30 -translate-x-1/2 rounded-full bg-amber-500/90 px-[3vh] py-[1.2vh] text-[2.2vh] font-semibold text-board-deep"
+      @click="reload"
+    >
+      Nowa wersja gry — kliknij, aby odświeżyć
+    </button>
 
     <div v-if="!tv.connected" class="absolute right-[2vh] top-[2vh] z-30 rounded-full bg-rose-600/80 px-[2vh] py-[1vh] text-[2vh]">
       Brak połączenia z serwerem

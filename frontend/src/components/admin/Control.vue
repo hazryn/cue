@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useCountdown } from '~/composables/useCountdown';
 import { useAdminStore } from '~/stores/admin';
 import { useUiStore } from '~/stores/ui';
 import Presence from './Presence.vue';
@@ -16,6 +17,10 @@ const teamName = (id: string | null): string => teams.value.find((t) => t.id ===
 const controlling = computed(() => question.value?.controllingTeamId ?? question.value?.stealingTeamId ?? null);
 const canAnswer = computed(() => fsm.value === 'Q_CONTROL' || fsm.value === 'Q_STEAL_ATTEMPT');
 const revealing = computed(() => fsm.value === 'Q_FORFEIT_REVEAL');
+const stealCountdown = useCountdown(
+  () => (fsm.value === 'Q_STEAL_RACE_OPEN' ? (question.value?.race?.armsAt ?? null) : null),
+  () => admin.serverOffsetMs,
+);
 const remaining = computed(() => question.value?.answers.filter((a) => !a.revealed) ?? []);
 
 async function skipToFinal(): Promise<void> {
@@ -81,7 +86,17 @@ async function revealRest(): Promise<void> {
     <section v-else-if="fsm === 'Q_STEAL_RACE_OPEN'" class="card text-center">
       <p class="font-display text-2xl tracking-wide text-gold">Przejęcie</p>
       <p class="text-sm text-white/60">Grają drużyny, które jeszcze nie próbowały.</p>
-      <button class="btn-primary mt-3" @click="admin.action('ADMIN_OPEN_RACE')">Odblokuj grzybki</button>
+      <template v-if="question.race">
+        <p v-if="stealCountdown.counting.value" class="mt-2 font-display text-5xl text-gold">
+          {{ stealCountdown.secondsLeft.value }}
+        </p>
+        <p v-else class="mt-2 font-display text-xl tracking-wide">Czekam na grzybek…</p>
+        <button class="btn-ghost mt-3" @click="admin.action('ADMIN_CANCEL_RACE')">Anuluj wyścig</button>
+      </template>
+      <template v-else>
+        <p class="mt-1 text-xs text-white/40">Po kliknięciu telewizor odliczy 3-2-1 i dopiero wtedy grzybki ożyją.</p>
+        <button class="btn-primary mt-3" @click="admin.action('ADMIN_OPEN_RACE')">Odblokuj grzybki</button>
+      </template>
     </section>
 
     <!-- Odpowiedzi: duże cele dotykowe, bo klikane w półmroku i pod presją -->

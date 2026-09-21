@@ -121,9 +121,9 @@ await shot(tv, 'tv-ranking');
 await admin.getByPlaceholder('Imię').first().fill('Ania');
 await admin.getByPlaceholder('Imię').nth(1).fill('Bartek');
 await admin.getByRole('button', { name: 'Rozpocznij finał' }).click();
-await admin.getByRole('button', { name: 'Zaczynamy — gracz 1' }).click();
 await tv.getByText('OPUŚĆ POKÓJ').waitFor();
 await shot(tv, 'tv-final-gate');
+await admin.getByRole('button', { name: 'Zaczynamy — gracz 1' }).click();
 await admin.getByRole('button', { name: 'Start tury' }).click();
 
 const progress = admin.getByTestId('final-progress');

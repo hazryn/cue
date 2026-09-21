@@ -27,12 +27,11 @@ const running = computed(() => final.value?.fsm === 'F_P1_RUNNING' || final.valu
 const paused = computed(() => final.value?.fsm === 'F_P1_PAUSED' || final.value?.fsm === 'F_P2_PAUSED');
 const ready = computed(() => final.value?.fsm === 'F_P1_READY' || final.value?.fsm === 'F_P2_READY');
 const activeName = computed(() => (final.value?.turn === 1 ? final.value?.p1Name : final.value?.p2Name));
-const otherName = computed(() => (final.value?.turn === 1 ? final.value?.p2Name : final.value?.p1Name));
 </script>
 
 <template>
   <div v-if="final" class="flex flex-col gap-3 p-4 pb-24">
-    <section class="card">
+    <section v-if="final.turn" class="card">
       <p class="text-xs uppercase tracking-widest text-white/40">
         gracz {{ final.turn }} · pytanie
         <span data-testid="final-progress">{{ final.qCursor + 1 }}/{{ final.questionCount }}</span>
@@ -43,7 +42,7 @@ const otherName = computed(() => (final.value?.turn === 1 ? final.value?.p2Name 
     <!-- Bramka: prowadzący potwierdza, że drugi gracz naprawdę wyszedł z pokoju -->
     <section v-if="ready" class="card text-center">
       <p class="font-display text-2xl tracking-wide text-rose-300">
-        {{ final.turn === 1 ? `${otherName} opuszcza pokój` : `${otherName} wraca — ${activeName} gra` }}
+        {{ final.turn === 1 ? `${final.p1Name} przy telewizorze` : `${final.p2Name} wraca do pokoju` }}
       </p>
       <p class="mt-1 text-sm text-white/60">Pierwsze pytanie pojawi się po Twoim kliknięciu.</p>
       <button class="btn-primary mt-3 w-full text-lg" @click="admin.action('ADMIN_FINAL_START_TIMER')">
@@ -127,8 +126,11 @@ const otherName = computed(() => (final.value?.turn === 1 ? final.value?.p2Name 
       </button>
     </section>
 
+    <!-- Gracz 2 wychodzi, zanim telewizor pokaże planszę — dopiero potem prowadzący woła gracza 1 -->
     <section v-if="final.fsm === 'F_SETUP'" class="card text-center">
-      <button class="btn-primary w-full" @click="admin.action('ADMIN_FINAL_BEGIN_TURN', { player: 1 })">
+      <p class="font-display text-2xl tracking-wide text-rose-300">{{ final.p2Name }} opuszcza pokój</p>
+      <p class="mt-1 text-sm text-white/60">Telewizor pokazuje komunikat. Plansza pojawi się po kliknięciu.</p>
+      <button class="btn-primary mt-3 w-full" @click="admin.action('ADMIN_FINAL_BEGIN_TURN', { player: 1 })">
         Zaczynamy — gracz 1
       </button>
     </section>

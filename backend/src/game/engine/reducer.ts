@@ -18,6 +18,7 @@ import {
   buildQuestionState,
   clone,
   findTeam,
+  stealArmsAt,
 } from './state';
 import {
   applyContinue,
@@ -119,6 +120,7 @@ function apply(state: GameState, event: GameEvent, sounds: SoundKey[]): void {
         kind: q.fsm === 'Q_STEAL_RACE_OPEN' ? 'STEAL' : 'MAIN',
         eligible,
         openedAt: event.at,
+        armsAt: q.fsm === 'Q_STEAL_RACE_OPEN' ? stealArmsAt(state, event.at) : event.at,
         closesAt: null,
       };
       q.fsm = q.race.kind === 'STEAL' ? 'Q_STEAL_RACE_OPEN' : 'Q_RACE_OPEN';
@@ -129,7 +131,8 @@ function apply(state: GameState, event: GameEvent, sounds: SoundKey[]): void {
         q.questionRevealed = true;
         sounds.push('question_reveal');
       }
-      sounds.push('race_open');
+      // Przy przejęciu sygnał startu gra telewizor na końcu odliczania 3-2-1
+      if (q.race.kind !== 'STEAL') sounds.push('race_open');
       return;
     }
 

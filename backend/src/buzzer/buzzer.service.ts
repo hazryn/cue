@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { ClockSyncService } from './clock-sync.service';
 import { BuzzPressEntity } from './entities/buzz-press.entity';
 import { BuzzRaceEntity } from './entities/buzz-race.entity';
+import { raceArmsAt } from '../game/engine/state';
 import { OffsetCorrectedStrategy } from './strategies/offset-corrected.strategy';
 import { PressRecord } from './strategies/resolve-strategy';
 
@@ -31,6 +32,8 @@ interface OpenRace {
   kind: string;
   eligible: Uuid[];
   openedAt: number;
+  /** Od kiedy naciśnięcie się liczy; wcześniej falstart (odliczanie przy przejęciu) */
+  armsAt: number;
   presses: PressRecord[];
   timer: NodeJS.Timeout | null;
   windowMs: number;
@@ -98,6 +101,7 @@ export class BuzzerService {
       kind: race.kind,
       eligible: race.eligible,
       openedAt: race.openedAt,
+      armsAt: raceArmsAt(race),
       presses: [],
       timer: null,
       windowMs: state.config.raceWindowMs,
@@ -128,7 +132,7 @@ export class BuzzerService {
     await this.savePress(race, input, serverRecvMs, adjustedMs, rejectedReason);
 
     if (rejectedReason === 'FALSE_START') {
-      this.lockouts.set(input.teamId, race.openedAt + race.lockoutMs);
+      this.lockouts.set(input.teamId, race.armsAt + race.lockoutMs);
       return { ok: false, code: 'FALSE_START', error: 'Za wcześnie — grzybek zablokowany na moment' };
     }
 
@@ -167,7 +171,7 @@ export class BuzzerService {
       this.logger.warn(`Nieufny zegar drużyny ${input.teamId} — używam czasu odbioru`);
       adjusted = serverRecvMs;
     }
-    if (adjusted < race.openedAt) return { adjustedMs: adjusted, rejectedReason: 'FALSE_START' };
+    if (adjusted < race.armsAt) return { adjustedMs: adjusted, rejectedReason: 'FALSE_START' };
     return { adjustedMs: adjusted, rejectedReason: null };
   }
 

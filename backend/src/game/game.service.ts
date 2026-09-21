@@ -24,7 +24,7 @@ import { GameEntity } from './entities/game.entity';
 import { TeamEntity } from './entities/team.entity';
 import { canApply } from './engine/guards';
 import { reduce, replay } from './engine/reducer';
-import { initialState, nextColor, slugifyTeamName } from './engine/state';
+import { initialState, nextColor, raceArmsAt, slugifyTeamName } from './engine/state';
 
 export class GameActionError extends Error {
   constructor(
@@ -348,7 +348,7 @@ export class GameService implements OnModuleInit {
             actor: 'system',
             payload: { raceId },
           }),
-        Math.max(0, race.openedAt + state.config.raceTimeoutMs - Date.now()),
+        Math.max(0, raceArmsAt(race) + state.config.raceTimeoutMs - Date.now()),
       );
       this.raceTimer.unref();
     }

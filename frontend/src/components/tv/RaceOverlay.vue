@@ -1,12 +1,32 @@
 <script setup lang="ts">
 import type { RaceView, TeamView } from '@cue/shared';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
+import { useCountdown } from '~/composables/useCountdown';
+import { useAudioStore } from '~/stores/audio';
+import { useTvStore } from '~/stores/tv';
 
 const props = defineProps<{ race: RaceView; teams: TeamView[] }>();
+const tv = useTvStore();
+const audio = useAudioStore();
 
 const eligible = computed(() => props.teams.filter((t) => props.race.eligible.includes(t.id)));
 const title = computed(() =>
   props.race.kind === 'STEAL' ? 'PRZEJĘCIE — KTO PIERWSZY?' : props.race.kind === 'TIEBREAK' ? 'DOGRYWKA!' : 'KTO PIERWSZY?',
+);
+
+// Przejęcie: 3-2-1 na ekranie, grzybki ożywają dopiero na zerze (serwer pilnuje tego samego)
+const countdown = useCountdown(
+  () => props.race.armsAt,
+  () => tv.serverOffsetMs,
+);
+watch(
+  () => [props.race.id, countdown.secondsLeft.value] as const,
+  ([raceId, left], previous) => {
+    if (left > 0) audio.play('countdown_tick');
+    // Dźwięk startu tylko po faktycznym odliczaniu — nie przy odświeżeniu w trakcie wyścigu
+    else if (previous && previous[0] === raceId && previous[1] > 0) audio.play('race_open');
+  },
+  { immediate: true },
 );
 </script>
 
@@ -26,6 +46,15 @@ const title = computed(() =>
       </div>
     </div>
 
-    <p class="mt-[5vh] font-display text-[3vh] tracking-[0.4em] text-white/40">GRZYBKI ODBLOKOWANE</p>
+    <!-- Klucz tekstowy: liczba zderzała się z kluczem gałęzi v-else i Vue nie podmieniał elementu -->
+    <p
+      v-if="countdown.counting.value"
+      :key="`countdown-${countdown.secondsLeft.value}`"
+      data-testid="tv-race-countdown"
+      class="mt-[3vh] animate-pop-in font-display text-[18vh] leading-none text-gold"
+    >
+      {{ countdown.secondsLeft.value }}
+    </p>
+    <p v-else class="mt-[5vh] font-display text-[3vh] tracking-[0.4em] text-white/40">GRZYBKI ODBLOKOWANE</p>
   </div>
 </template>

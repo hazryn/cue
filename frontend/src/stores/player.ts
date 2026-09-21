@@ -11,7 +11,7 @@ const TOKEN_KEY = 'cue.play.token';
 export const usePlayerStore = defineStore('player', () => {
   const ui = useUiStore();
   const view = ref<PlayerView | null>(null);
-  const buzzer = ref<BuzzerArm>({ raceId: null, armed: false, reason: 'WAITING', openedAt: null });
+  const buzzer = ref<BuzzerArm>({ raceId: null, armed: false, reason: 'WAITING', openedAt: null, armsAt: null });
   const connected = ref(false);
   const joining = ref(false);
   const evicted = ref<string | null>(null);
@@ -77,6 +77,9 @@ export const usePlayerStore = defineStore('player', () => {
    */
   async function buzz(event: PointerEvent): Promise<void> {
     if (!buzzer.value.armed || !buzzer.value.raceId) return;
+    // W trakcie odliczania 3-2-1 serwer i tak uznałby to za falstart
+    const armsAt = buzzer.value.armsAt;
+    if (armsAt !== null && Date.now() + clock.offsetMs.value < armsAt) return;
     const clientTs = Math.round(performance.timeOrigin + event.timeStamp);
     buzzer.value = { ...buzzer.value, armed: false, reason: 'ALREADY_PRESSED' };
     if (navigator.vibrate) navigator.vibrate(25);
